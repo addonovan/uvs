@@ -6,6 +6,7 @@ double calculate_deflection_component(const SensorReading& reading) {
     const double THRESHOLD = 200;
 
     if (reading.angle >= 85.0 && reading.angle <= 95.0 && reading.distance < THRESHOLD) {
+        ROS_INFO("%lf deg => %lf distance", reading.angle, reading.distance);
         return pow(THRESHOLD - reading.distance, 2) * 0.00003;
     }
 

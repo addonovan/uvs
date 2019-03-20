@@ -9,13 +9,6 @@ bool messages_written = false;
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     double deflection = calculate_deflection(message);
-    ROS_INFO(
-            "Input = { min = %03.1f, step = %02.1f, max = %03.1f } => Output = %lf", 
-            rad2deg(message->angle_min), 
-            rad2deg(message->angle_increment), 
-            rad2deg(message->angle_max),
-            deflection
-    );
 
     std_msgs::Float64 msg;
     msg.data = deflection; 
