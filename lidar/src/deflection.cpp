@@ -19,8 +19,8 @@
 double calculate_deflection_component(const SensorReading& reading) {
     const int THRESHOLD = 200;
 
-    if (reading.angle >= 5.0 && reading.angle <= 5.0 && reading.distance < THRESHOLD) {
-        return pow(THRESHOLD - reading.distance, 2) * 0.00003;
+    if (reading.angle > -5 && reading.angle < 5 && reading.distance < THRESHOLD) {
+        return ((THRESHOLD - reading.distance) << 2) * 0.00003;
     }
 
     return 0.0;
