@@ -12,7 +12,10 @@ double calculate_deflection_component(const SensorReading& reading) {
 }
 
 double rad2deg(double radians) {
-    return radians * 180 / 3.14159; // close enough
+    double degrees = radians * 180 / 3.14159; // close enough
+    while (degrees < 0.0) degrees += 360.0;
+    while (degrees >= 360.0) degrees -= 360.0;
+    return degrees;
 }
 
 double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
