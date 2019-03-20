@@ -3,14 +3,11 @@
 #include <sensor_msgs/LaserScan.h>
 #include <deflection.hpp>
 
-//
-// Boilerplate ROS
-//
-
 ros::Publisher* publisher = nullptr;
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     double deflection = calculate_deflection(message);
+    ROS_INFO("Prescribed angle deflection of %lf", deflection);
 
     std_msgs::Float64 msg;
     msg.data = deflection; 
@@ -29,6 +26,7 @@ int main(int argc, char** argv) {
     ros::Subscriber sub = n.subscribe("scan", 1, on_lidar_message);
 
     // run endlessly
+    ROS_INFO("Initialized lidar reactive control system");
     ros::spin();
     return 0;
 }
