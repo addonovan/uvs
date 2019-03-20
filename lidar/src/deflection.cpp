@@ -44,14 +44,37 @@ double rad2deg(double radians) {
     return degrees;
 }
 
+double weight_for(int angle) {
+    assert(angle > -180);
+    assert(angle <= 180);
+
+    // throw out any angles behind the rover
+    if (angle > 90 || angle < -90) {
+        return 0;
+    }
+    
+    // bring to interval [0, 1] where 
+    //      angle = 0 => weight = 1
+    double weight = (90.0 - angle) / 90.0; 
+
+    // decrease the weight of going to the left or right
+    weight = pow(weight, 2);
+
+    return weight;
+}
+
 double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     double angle_end = message->angle_max;
     double angle_step = message->angle_increment;
     double min_distance = message->range_min;
     double max_distance = message->range_max;
 
-    int reading_count = 0;
+    // accumulators for a weighted average
+    // (ax + by + cz) / (a + b + c) => weighted average of x, y, z
+    // \____________/                  deflection accumulator
+    //                  \_________/    weight accumulator
     double deflection_accumulator = 0.0;
+    double weight_accumulator = 0.0;
 
     double angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
@@ -68,16 +91,13 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
         reading.distance = static_cast<int>(distance * 15 / 0.20);
         reading.angle = static_cast<int>(rad2deg(angle));
 
-
-        deflection_accumulator += calculate_deflection_component(reading);
-        reading_count++;
+        // calculate the deflection, and its weight
+        double weight = weight_for(angle);
+        double deflection = calculate_deflection_component(reading);
+        deflection_accumulator += weight * deflection;
+        weight_accumulator += weight; 
     }
 
-    // return the average deflection component
-    if (reading_count == 0) {
-        return 0.0;
-    } else {
-        return deflection_accumulator / reading_count;
-    }
+    return deflection_accumulator / weight_accumulator;
 }
 
