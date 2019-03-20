@@ -1,11 +1,12 @@
 #include <cmath>
+#include <cassert>
 #include <ros/ros.h>
 #include <deflection.hpp>
 
 double calculate_deflection_component(const SensorReading& reading) {
     const double THRESHOLD = 200;
 
-    if (reading.angle >= 85.0 && reading.angle <= 95.0 && reading.distance < THRESHOLD) {
+    if (reading.angle >= -5.0 && reading.angle <= 5.0 && reading.distance < THRESHOLD) {
         ROS_INFO("%lf deg => %lf distance", reading.angle, reading.distance);
         return pow(THRESHOLD - reading.distance, 2) * 0.00003;
     }
@@ -15,6 +16,19 @@ double calculate_deflection_component(const SensorReading& reading) {
 
 double rad2deg(double radians) {
     double degrees = radians * 180 / 3.14159; // close enough
+
+    // rotate the coordinate system so that 0 is the front of the robot
+    // then positive should be ccw (i.e. the robot's left)
+    // and negative should bw cw (i.e. the robot's right)
+
+    if (degrees < 0) {
+        degrees += 180;
+    } else {
+        degrees -= 180;
+    }
+
+    assert(degrees > -181.0);
+    assert(degrees < 180.0);
     return degrees;
 }
 
