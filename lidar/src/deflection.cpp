@@ -3,11 +3,16 @@
 
 double calculate_deflection_component(const SensorReading& reading) {
     const double THRESHOLD = 200;
-    if (reading.distance < THRESHOLD) {
+
+    if (reading.angle >= 85.0 && reading.angle <= 95.0 && reading.distance < THRESHOLD) {
         return pow(THRESHOLD - reading.distance, 2) * 0.00003;
     }
 
     return 0.0;
+}
+
+double rad2deg(double radians) {
+    return radians * 180 / 3.14159; // close enough
 }
 
 double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
@@ -23,7 +28,7 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
         SensorReading reading;
         reading.distance = message->ranges[i];
-        reading.angle = angle;
+        reading.angle = rad2deg(angle);
 
         // skip over invalid readings
         if (reading.distance < min_distance || reading.distance > max_distance) {
