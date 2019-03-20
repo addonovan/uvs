@@ -13,17 +13,30 @@
  * Assumptions:
  * - reading.angle is an int within [-180, 180]
  * - reading.angle is 0.0 for readings directly in front of the rover 
+ * - positive angles are to the rover's right
+ *   negative angles are to the rover's left
  * - reading.distance is a int measuring centimeters
  * - reading.distance will not be below about 15 cm
  */
 double calculate_deflection_component(const SensorReading& reading) {
     const int THRESHOLD = 200;
-
-    if (reading.angle > -5 && reading.angle < 5 && reading.distance < THRESHOLD) {
-        return ((THRESHOLD - reading.distance) << 2) * 0.00003;
+    if (reading.distance > THRESHOLD) {
+        return 0.0;
     }
 
-    return 0.0;
+    // find out how severe of a turn we should be making
+    double severity = ((THRESHOLD - reading.distance) << 2) * 0.00003;
+
+    // calculate the desired direction we should be heading in to avoid
+    // this obstacle (opposite of the direction of the reading)
+    int direction;
+    if (reading.angle > 0) {
+        direction = -1;
+    } else {
+        direction = 1;
+    }
+
+    return severity * direction;
 }
 
 double rad2deg(double radians) {
