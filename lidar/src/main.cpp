@@ -7,15 +7,12 @@
 // Boilerplate ROS
 //
 
-using Output = std_msgs::Float64;
-using Input = sensor_msgs::LaserScan;
-
 ros::Publisher* publisher = nullptr;
 
-void on_lidar_message(const Input::ConstPtr& message) {
+void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     double deflection = calculate_deflection(message);
 
-    Output msg;
+    std_msgs::Float64 msg;
     msg.data = deflection; 
     publisher->publish(msg);
 }
@@ -25,7 +22,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
 
     // set up the publisher
-    ros::Publisher pub = n.advertise<Output>("delta_commanded_theta", 1);
+    ros::Publisher pub = n.advertise<std_msgs::Float64>("theta_deflection", 1);
     publisher = &pub;
 
     // set up the subscriber
