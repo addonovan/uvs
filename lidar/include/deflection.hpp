@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SensorData.hpp"
+#include "reading.hpp"
 
 double calculate_deflection_component(const SensorReading& reading);
 
