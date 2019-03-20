@@ -5,8 +5,8 @@
 
 struct SensorReading final {
     public:
-        double distance;
-        double angle;
+        int distance;
+        int angle;
 };
 
 std::vector<SensorReading> 

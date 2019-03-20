@@ -3,11 +3,23 @@
 #include <ros/ros.h>
 #include <deflection.hpp>
 
+/**
+ * Calculate the deflection component derived from this one reading. This is 
+ * applied to each and every (valid) reading that the sensor reads. Each
+ * component is then combined and weighted with a function based on its angle,
+ * thus these can all be knee-jerk reactions, but they will probably get 
+ * smoothed out.
+ *
+ * Assumptions:
+ * - reading.angle is an int within [-180, 180]
+ * - reading.angle is 0.0 for readings directly in front of the rover 
+ * - reading.distance is a int measuring centimeters
+ * - reading.distance will not be below about 15 cm
+ */
 double calculate_deflection_component(const SensorReading& reading) {
-    const double THRESHOLD = 200;
+    const int THRESHOLD = 200;
 
-    if (reading.angle >= -5.0 && reading.angle <= 5.0 && reading.distance < THRESHOLD) {
-        ROS_INFO("%lf deg => %lf distance", reading.angle, reading.distance);
+    if (reading.angle >= 5.0 && reading.angle <= 5.0 && reading.distance < THRESHOLD) {
         return pow(THRESHOLD - reading.distance, 2) * 0.00003;
     }
 
@@ -43,16 +55,19 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
 
     double angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
-        SensorReading reading;
-        reading.distance = message->ranges[i];
-        reading.angle = rad2deg(angle);
-
         // skip over invalid readings
-        if (reading.distance < min_distance 
-         || reading.distance > max_distance
-         || !std::isfinite(reading.distance)) {
+        double distance = message->ranges[i];
+        if (distance < min_distance 
+         || distance > max_distance
+         || !std::isfinite(distance)) {
             continue;
         } 
+        
+        // from experimentation 0.20 range is about 15cm
+        SensorReading reading;
+        reading.distance = static_cast<int>(distance * 15 / 0.20);
+        reading.angle = static_cast<int>(rad2deg(angle));
+
 
         deflection_accumulator += calculate_deflection_component(reading);
         reading_count++;

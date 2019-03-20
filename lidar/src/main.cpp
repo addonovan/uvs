@@ -5,8 +5,6 @@
 
 ros::Publisher* publisher = nullptr;
 
-bool messages_written = false;
-
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     double deflection = calculate_deflection(message);
 
