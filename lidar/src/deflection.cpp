@@ -25,7 +25,7 @@ double calculate_deflection_component(const SensorReading& reading) {
     }
 
     // find out how severe of a turn we should be making
-    double severity = ((THRESHOLD - reading.distance) << 2) * 0.00003;
+    double severity = ((THRESHOLD - reading.distance) << 2) * 0.002;
 
     // calculate the desired direction we should be heading in to avoid
     // this obstacle (opposite of the direction of the reading)
@@ -55,6 +55,10 @@ double rad2deg(double radians) {
     assert(degrees > -181.0);
     assert(degrees < 180.0);
     return degrees;
+}
+
+double deg2rad(double degrees) {
+    return degrees * 3.14159 / 180;
 }
 
 double weight_for(int angle) {

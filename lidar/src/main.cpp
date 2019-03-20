@@ -8,8 +8,14 @@ ros::Publisher* publisher = nullptr;
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     double deflection = calculate_deflection(message);
 
+    // for large angles we should report the changes we're making
+    if (deflection >= 1.0 || deflection <= -1.0) {
+        ROS_INFO("Deflecting by %f°", deflection);
+    }
+
+    // respond with a 64-bit float telling by how many radians we should deflect
     std_msgs::Float64 msg;
-    msg.data = deflection; 
+    msg.data = deg2rad(deflection); 
     publisher->publish(msg);
 }
 
