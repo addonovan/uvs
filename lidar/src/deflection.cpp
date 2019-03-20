@@ -3,8 +3,7 @@
 
 double calculate_deflection_component(const SensorReading& reading) {
     const double THRESHOLD = 200;
-    if (reading.angle > 90.0 && reading.angle < 92.0 && reading.distance < THRESHOLD) {
-        ROS_INFO("Object is directly in front! at 90 deg!");
+    if (reading.distance < THRESHOLD) {
         return pow(THRESHOLD - reading.distance, 2) * 0.00003;
     }
 

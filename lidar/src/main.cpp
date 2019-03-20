@@ -5,9 +5,15 @@
 
 ros::Publisher* publisher = nullptr;
 
+bool messages_written = false;
+
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     double deflection = calculate_deflection(message);
-    ROS_INFO("Prescribed angle deflection of %lf", deflection);
+    ROS_INFO(
+            "Input = { min = %f, step = %f, max = %f }\t\tOutput = %lf", 
+            message->angle_min, message->angle_increment, message->angle_max,
+            deflection
+    );
 
     std_msgs::Float64 msg;
     msg.data = deflection; 
