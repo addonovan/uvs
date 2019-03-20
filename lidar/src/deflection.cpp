@@ -1,3 +1,4 @@
+#include <cmath>
 #include <ros/ros.h>
 #include <deflection.hpp>
 
@@ -32,7 +33,9 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
         reading.angle = rad2deg(angle);
 
         // skip over invalid readings
-        if (reading.distance < min_distance || reading.distance > max_distance) {
+        if (reading.distance < min_distance 
+         || reading.distance > max_distance
+         || !std::isfinite(reading.distance)) {
             continue;
         } 
 
