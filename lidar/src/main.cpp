@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <sensor_msgs/LaserScan.h>
+#include <SensorData.hpp>
 
 double calculate_angle(int distance) {
     const double THRESHOLD = 200;
@@ -21,7 +22,7 @@ using Input = sensor_msgs::LaserScan;
 ros::Publisher* publisher = nullptr;
 
 void on_lidar_message(const Input::ConstPtr& message) {
-    ROS_INFO("Range 0: %lf", message->ranges[0]);
+    auto readings = convert_readings(message);
 
     Output msg;
     msg.data = calculate_angle(message->ranges[0]); 
