@@ -21,7 +21,7 @@ using Input = sensor_msgs::LaserScan;
 ros::Publisher* publisher = nullptr;
 
 void on_lidar_message(const Input::ConstPtr& message) {
-    ROS_INFO("Range 0: %d", message->ranges[0]);
+    ROS_INFO("Range 0: %lf", message->ranges[0]);
 
     Output msg;
     msg.data = calculate_angle(message->ranges[0]); 
