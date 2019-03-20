@@ -18,7 +18,7 @@ catkin_package()
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(lidar src/SensorData.cpp src/main.cpp)
+add_executable(lidar src/deflection.cpp src/SensorData.cpp src/main.cpp)
 target_link_libraries(lidar ${catkin_LIBRARIES})
 add_dependencies(lidar beginner_tutorials_generate_messages_cpp)
 
