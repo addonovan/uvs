@@ -3,10 +3,22 @@
 #include <math.hpp>
 #include <deflection.hpp>
 
+/**
+ * The smallest angle ([-180, 180]) that the rover should look at when trying
+ * to avoid obstacles.
+ */
 const Degree MIN_ANGLE{-90};
 
+/**
+ * The largest angle ([-180, 180]) that the rover should look at when trying
+ * to avoid obstacles.
+ */
 const Degree MAX_ANGLE{90};
 
+/**
+ * The threshold at which we should start caring about obstacles and begin
+ * altering our heading to avoid them. 
+ */
 const Centimeter THRESHOLD{200};
 
 /**
@@ -49,7 +61,8 @@ double weight_for(const Degree& angle) {
     //      angle = 0 => weight = 1
     double weight = (90.0 - angle.as_double()) / 90.0; 
 
-    // decrease the weight of going to the left or right
+    // the deflections generated from angles directly in front of the rover
+    // matter FAR FAR more than the ones to the left or right of the rover
     weight = pow(weight, 2);
 
     return weight;
@@ -84,18 +97,21 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
             continue;
         } 
 
+        // create a SensorReading from this information
         Centimeter distance = static_cast<int>(range * 15.0 / 0.20);
-        
-        // from experimentation 0.20 range is about 15cm
         SensorReading reading{distance, angle_deg};
 
         // calculate the deflection, and its weight
         double weight = weight_for(angle_deg);
         Degree deflection = calculate_deflection_component(reading);
+
+        // add the values to their respective accumulators
         deflection_accumulator += deflection * weight;
         weight_accumulator += weight; 
     }
 
+    // calculate the weighted average, to find out what the overall
+    // deflection should be
     return deflection_accumulator / weight_accumulator;
 }
 
