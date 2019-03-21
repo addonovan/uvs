@@ -1,7 +1,13 @@
-#include <cmath>
 #include <cassert>
 #include <ros/ros.h>
+#include <math.hpp>
 #include <deflection.hpp>
+
+const Degree MIN_ANGLE{-90};
+
+const Degree MAX_ANGLE{90};
+
+const Centimeter THRESHOLD{200};
 
 /**
  * Calculate the deflection component derived from this one reading. This is 
@@ -18,61 +24,30 @@
  * - reading.distance is a int measuring centimeters
  * - reading.distance will not be below about 15 cm
  */
-double calculate_deflection_component(const SensorReading& reading) {
-    const int THRESHOLD = 200;
+Degree calculate_deflection_component(const SensorReading& reading) {
     if (reading.distance > THRESHOLD) {
         return 0.0;
     }
 
-    // find out how severe of a turn we should be making
-    double severity = ((THRESHOLD - reading.distance) << 2) * 0.002;
+    // calculate the weight of the angle at this point in time [0, 1]
+    auto thresh = THRESHOLD.as_int();
+    double weight = thresh - reading.distance.as_int();
+    weight /= thresh;
 
-    // calculate the desired direction we should be heading in to avoid
-    // this obstacle (opposite of the direction of the reading)
-    int direction;
-    if (reading.angle > 0) {
-        direction = -1;
-    } else {
-        direction = 1;
-    }
+    // try to go 90° away from the problem direction
+    Degree direction = reading.angle >= 0 ?
+        reading.angle - Degree{90.0} : Degree{90.0} - reading.angle;
 
-    return severity * direction;
+    // scale that angle down by the weight (if the object is further away,
+    // we don't need to take as drastic measures to avoid it as if it were
+    // closer)
+    return weight * direction;
 }
 
-double rad2deg(double radians) {
-    double degrees = radians * 180 / 3.14159; // close enough
-
-    // rotate the coordinate system so that 0 is the front of the robot
-    // then positive should be ccw (i.e. the robot's left)
-    // and negative should bw cw (i.e. the robot's right)
-
-    if (degrees < 0) {
-        degrees += 180;
-    } else {
-        degrees -= 180;
-    }
-
-    assert(degrees > -181.0);
-    assert(degrees < 180.0);
-    return degrees;
-}
-
-double deg2rad(double degrees) {
-    return degrees * 3.14159 / 180;
-}
-
-double weight_for(int angle) {
-    assert(angle > -180);
-    assert(angle <= 180);
-
-    // throw out any angles behind the rover
-    if (angle > 90 || angle < -90) {
-        return 0;
-    }
-    
+double weight_for(const Degree& angle) {
     // bring to interval [0, 1] where 
     //      angle = 0 => weight = 1
-    double weight = (90.0 - angle) / 90.0; 
+    double weight = (90.0 - angle.as_double()) / 90.0; 
 
     // decrease the weight of going to the left or right
     weight = pow(weight, 2);
@@ -80,9 +55,9 @@ double weight_for(int angle) {
     return weight;
 }
 
-double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
-    double angle_end = message->angle_max;
-    double angle_step = message->angle_increment;
+Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
+    Radian angle_end = message->angle_max;
+    Radian angle_step = message->angle_increment;
     double min_distance = message->range_min;
     double max_distance = message->range_max;
 
@@ -90,28 +65,34 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     // (ax + by + cz) / (a + b + c) => weighted average of x, y, z
     // \____________/                  deflection accumulator
     //                  \_________/    weight accumulator
-    double deflection_accumulator = 0.0;
+    Degree deflection_accumulator = 0.0;
     double weight_accumulator = 0.0;
 
-    double angle = message->angle_min;
+    Radian angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
+        // skip over ranges we don't care about
+        Degree angle_deg = angle.as_degree();
+        if (angle_deg < MIN_ANGLE || MAX_ANGLE < angle_deg) {
+            continue;
+        }
+
         // skip over invalid readings
-        double distance = message->ranges[i];
-        if (distance < min_distance 
-         || distance > max_distance
-         || !std::isfinite(distance)) {
+        double range = message->ranges[i];
+        if (range < min_distance 
+         || range > max_distance
+         || !std::isfinite(range)) {
             continue;
         } 
+
+        Centimeter distance = static_cast<int>(range * 15.0 / 0.20);
         
         // from experimentation 0.20 range is about 15cm
-        SensorReading reading;
-        reading.distance = static_cast<int>(distance * 15 / 0.20);
-        reading.angle = static_cast<int>(rad2deg(angle));
+        SensorReading reading{distance, angle_deg};
 
         // calculate the deflection, and its weight
-        double weight = weight_for(angle);
-        double deflection = calculate_deflection_component(reading);
-        deflection_accumulator += weight * deflection;
+        double weight = weight_for(angle_deg);
+        Degree deflection = calculate_deflection_component(reading);
+        deflection_accumulator += deflection * weight;
         weight_accumulator += weight; 
     }
 

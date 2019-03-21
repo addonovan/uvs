@@ -2,20 +2,21 @@
 #include <std_msgs/Float64.h>
 #include <sensor_msgs/LaserScan.h>
 #include <deflection.hpp>
+#include <math.hpp>
 
 ros::Publisher* publisher = nullptr;
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
-    double deflection = calculate_deflection(message);
+    Degree deflection = calculate_deflection(message);
 
     // for large angles we should report the changes we're making
     if (deflection >= 1.0 || deflection <= -1.0) {
-        ROS_INFO("Deflecting by %f°", deflection);
+        ROS_INFO("Deflecting by %f°", deflection.as_double());
     }
 
     // respond with a 64-bit float telling by how many radians we should deflect
     std_msgs::Float64 msg;
-    msg.data = deg2rad(deflection); 
+    msg.data = deflection.as_radian().as_double(); 
     publisher->publish(msg);
 }
 
