@@ -78,7 +78,7 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     // (ax + by + cz) / (a + b + c) => weighted average of x, y, z
     // \____________/                  deflection accumulator
     //                  \_________/    weight accumulator
-    Degree deflection_accumulator = 0.0;
+    double deflection_accumulator = 0.0;
     double weight_accumulator = 0.0;
 
     Radian angle = message->angle_min;
@@ -106,7 +106,7 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
         Degree deflection = calculate_deflection_component(reading);
 
         // add the values to their respective accumulators
-        deflection_accumulator += deflection * weight;
+        deflection_accumulator += deflection.as_double() * weight;
         weight_accumulator += weight; 
     }
 
