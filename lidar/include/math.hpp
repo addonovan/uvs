@@ -36,7 +36,7 @@ struct Radian final {
 
         Radian operator*(double scalar) const;
         Radian operator/(double scalar) const;
-        
+
         bool operator<(const Radian& other) const;
         bool operator>(const Radian& other) const;
         bool operator==(const Radian& other) const;

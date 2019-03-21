@@ -3,7 +3,11 @@
 #include <math.hpp>
 #include <deflection.hpp>
 
-static Centimeter THRESHOLD{200};
+const Degree MIN_ANGLE{-90};
+
+const Degree MAX_ANGLE{90};
+
+const Centimeter THRESHOLD{200};
 
 /**
  * Calculate the deflection component derived from this one reading. This is 
@@ -41,11 +45,6 @@ Degree calculate_deflection_component(const SensorReading& reading) {
 }
 
 double weight_for(const Degree& angle) {
-    // throw out any angles behind the rover
-    if (angle > 90.0 || angle < -90.0) {
-        return 0.0;
-    }
-    
     // bring to interval [0, 1] where 
     //      angle = 0 => weight = 1
     double weight = (90.0 - angle.as_double()) / 90.0; 
@@ -71,6 +70,12 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
 
     Radian angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
+        // skip over ranges we don't care about
+        Degree angle_deg = angle.as_degree();
+        if (angle_deg < MIN_ANGLE || MAX_ANGLE < angle_deg) {
+            continue;
+        }
+
         // skip over invalid readings
         double range = message->ranges[i];
         if (range < min_distance 
@@ -80,7 +85,6 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
         } 
 
         Centimeter distance = static_cast<int>(range * 15.0 / 0.20);
-        Degree angle_deg = angle.as_degree();
         
         // from experimentation 0.20 range is about 15cm
         SensorReading reading{distance, angle_deg};
