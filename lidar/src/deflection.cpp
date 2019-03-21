@@ -32,7 +32,7 @@ Degree calculate_deflection_component(const SensorReading& reading) {
 
     // try to go 90° away from the problem direction
     Degree direction = reading.angle >= 0 ?
-        reading.angle - 90 : 90 - reading.angle;
+        reading.angle - Degree{90.0} : Degree{90.0} - reading.angle;
 
     // scale that angle down by the weight (if the object is further away,
     // we don't need to take as drastic measures to avoid it as if it were
@@ -40,17 +40,15 @@ Degree calculate_deflection_component(const SensorReading& reading) {
     return weight * direction;
 }
 
-double weight_for(const Radian& angle) {
-    Degree deg_angle = angle.as_degree(); 
-
-    // throw out any deg_angles behind the rover
-    if (deg_angle > 90.0 || deg_angle < -90.0) {
+double weight_for(const Degree& angle) {
+    // throw out any angles behind the rover
+    if (angle > 90.0 || angle < -90.0) {
         return 0.0;
     }
     
     // bring to interval [0, 1] where 
-    //      deg_angle = 0 => weight = 1
-    double weight = (90.0 - deg_angle.as_double()) / 90.0; 
+    //      angle = 0 => weight = 1
+    double weight = (90.0 - angle.as_double()) / 90.0; 
 
     // decrease the weight of going to the left or right
     weight = pow(weight, 2);
@@ -74,21 +72,21 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     Radian angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
         // skip over invalid readings
-        double distance = message->ranges[i];
-        if (distance < min_distance 
-         || distance > max_distance
-         || !std::isfinite(distance)) {
+        double range = message->ranges[i];
+        if (range < min_distance 
+         || range > max_distance
+         || !std::isfinite(range)) {
             continue;
         } 
+
+        Centimeter distance = static_cast<int>(range * 15.0 / 0.20);
+        Degree angle_deg = angle.as_degree();
         
         // from experimentation 0.20 range is about 15cm
-        SensorReading reading{
-                static_cast<int>(distance * 15.0 / 0.20),
-                angle.as_degree()
-        };
+        SensorReading reading{distance, angle_deg};
 
         // calculate the deflection, and its weight
-        double weight = weight_for(angle);
+        double weight = weight_for(angle_deg);
         Degree deflection = calculate_deflection_component(reading);
         deflection_accumulator += deflection * weight;
         weight_accumulator += weight; 
