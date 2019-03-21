@@ -2,6 +2,7 @@
 #include <std_msgs/Float64.h>
 #include <sensor_msgs/LaserScan.h>
 #include <deflection.hpp>
+#include <math.hpp>
 
 ros::Publisher* publisher = nullptr;
 
