@@ -24,6 +24,18 @@ Radian Degree::as_radian() const {
 double Degree::as_double() const { 
     return m_inner;
 }
+Degree Degree::as_robot_coordinates() const {
+    double value = m_inner;
+    if (value < 0.0) {
+        value += 180.0;
+    } else {
+        value -= 180.0;
+    }
+
+    assert(value > -181.0);
+    assert(value < 180.0);
+    return Degree{value};
+}
 
 //
 // Radian Implementation 
@@ -56,31 +68,5 @@ Centimeter::Centimeter(int value) {
 
 int Centimeter::as_int() const { 
     return m_inner;
-}
-
-//
-// Conversion
-//
-
-double rad2deg(double radians) {
-    double degrees = radians * 180 / 3.14159; // close enough
-
-    // rotate the coordinate system so that 0 is the front of the robot
-    // then positive should be ccw (i.e. the robot's left)
-    // and negative should bw cw (i.e. the robot's right)
-
-    if (degrees < 0) {
-        degrees += 180;
-    } else {
-        degrees -= 180;
-    }
-
-    assert(degrees > -181.0);
-    assert(degrees < 180.0);
-    return degrees;
-}
-
-double deg2rad(double degrees) {
-    return degrees * 3.14159 / 180;
 }
 

@@ -12,12 +12,14 @@ struct Degree final : public NumericType<Degree, double> {
 
         Radian as_radian() const;
         double as_double() const;
+
+        Degree as_robot_coordinates() const;
 };
 
 struct Radian final : public NumericType<Radian, double> {
     public:
         Radian(double value);
-        
+
         Degree as_degree() const;
         double as_double() const;
 };

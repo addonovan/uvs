@@ -84,7 +84,7 @@ Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     Radian angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
         // skip over ranges we don't care about
-        Degree angle_deg = angle.as_degree();
+        Degree angle_deg = angle.as_degree().as_robot_coordinates();
         if (angle_deg < MIN_ANGLE || MAX_ANGLE < angle_deg) {
             continue;
         }
