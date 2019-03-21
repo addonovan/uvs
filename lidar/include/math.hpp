@@ -24,7 +24,7 @@ struct Radian final : public NumericType<Radian, double> {
         double as_double() const;
 };
 
-struct Centimeter final : public NumericType<Centimeter, double> {
+struct Centimeter final : public NumericType<Centimeter, int> {
     public:
         Centimeter(int value);
         
