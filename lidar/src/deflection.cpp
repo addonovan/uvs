@@ -3,6 +3,8 @@
 #include <math.hpp>
 #include <deflection.hpp>
 
+static Centimeter THRESHOLD{200};
+
 /**
  * Calculate the deflection component derived from this one reading. This is 
  * applied to each and every (valid) reading that the sensor reads. Each
@@ -19,24 +21,20 @@
  * - reading.distance will not be below about 15 cm
  */
 Degree calculate_deflection_component(const SensorReading& reading) {
-    const int THRESHOLD = 200;
     if (reading.distance > THRESHOLD) {
         return 0.0;
     }
 
-    // find out how severe of a turn we should be making
-    double severity = ((THRESHOLD - reading.distance) << 2) * 0.002;
+    // calculate the weight of the angle at this point in time [0, 1]
+    auto thresh = THRESHOLD.as_int();
+    double weight = thresh - reading.distance.as_int();
+    weight /= thresh;
 
-    // calculate the desired direction we should be heading in to avoid
-    // this obstacle (opposite of the direction of the reading)
-    int direction;
-    if (reading.angle > 0) {
-        direction = -1;
-    } else {
-        direction = 1;
-    }
+    // invert the angle and that's the direction our robot should be going
+    // in (possible because 0° is directly forward) 
+    Degree direction = -reading.angle;
 
-    return severity * direction;
+    return weight * direction;
 }
 
 double weight_for(const Radian& angle) {

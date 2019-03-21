@@ -7,9 +7,9 @@
 
 struct SensorReading final {
     public:
-        SensorReading(int dist, Degree ang) : distance{dist}, angle{ang} {}
+        SensorReading(Centimeter dist, Degree ang) : distance{dist}, angle{ang} {}
 
-        int distance;
+        Centimeter distance;
         Degree angle;
 };
 

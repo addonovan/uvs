@@ -11,7 +11,7 @@ struct Degree final {
         Degree(double value);
 
         Degree operator+(const Degree& other) const;
-        Degree operator-(const Degree& other) const;
+        Degree operator-() const;
         
         Degree operator*(double scalar) const;
         Degree operator/(double scalar) const;
@@ -32,7 +32,7 @@ struct Radian final {
         Radian(double value);
 
         Radian operator+(const Radian& other) const;
-        Radian operator-(const Radian& other) const;
+        Radian operator-() const;
 
         Radian operator*(double scalar) const;
         Radian operator/(double scalar) const;
