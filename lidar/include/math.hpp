@@ -1,5 +1,46 @@
 #pragma once
 
+struct Degree;
+struct Radian;
+
+struct Degree final {
+    public:
+        Degree(int value);
+
+        Degree operator+(const Degree& other) const;
+        Degree operator-(const Degree& other) const;
+        
+        Degree operator*(double scalar) const;
+        Degree operator/(double scalar) const;
+
+        bool operator<(const Degree& other) const;
+        bool operator>(const Degree& other) const;
+        bool operator==(const Degree& other) const;
+
+        Radian as_radian() const;
+        int as_int() const;
+
+    private:
+        int m_inner;
+};
+
+struct Radian final {
+    public:
+        Radian(double value);
+
+        Radian operator+(const Radian& other) const;
+        Radian operator-(const Radian& other) const;
+
+        Radian operator*(double scalar) const;
+        Radian operator/(double scalar) const;
+
+        Degree as_degree() const;
+        double as_double() const;
+
+    private:
+        double m_inner;
+};
+
 /**
  * Converts the number in radians in the interval [-pi/2, pi/2] 
  * to degrees within the interval [-180, 180]. 
