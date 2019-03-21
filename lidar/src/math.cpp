@@ -18,30 +18,6 @@ Degree::Degree(double value) {
     assert(value <= 180);
 }
 
-Degree Degree::operator+(const Degree& other) const { 
-    return Degree{m_inner + other.m_inner}; 
-}
-Degree Degree::operator-() const { 
-    return Degree{-m_inner}; 
-}
-
-Degree Degree::operator*(double scalar) const { 
-    return Degree{scalar * m_inner}; 
-}
-Degree Degree::operator/(double scalar) const { 
-    return Degree{scalar / m_inner}; 
-}
-
-bool Degree::operator<(const Degree& other) const {
-    return m_inner < other.m_inner;
-}
-bool Degree::operator>(const Degree& other) const {
-    return m_inner > other.m_inner;
-}
-bool Degree::operator==(const Degree& other) const {
-    return m_inner == other.m_inner;
-}
-
 Radian Degree::as_radian() const { 
     return Radian{m_inner / RADIAN_TO_DEGREE_FACTOR};
 }
@@ -53,7 +29,7 @@ double Degree::as_double() const {
 // Radian Implementation 
 //
 
-Radian::Radian(double value) : m_inner{value} {
+Radian::Radian(double value) {
     auto integral_part = static_cast<long long int>(value);
     auto fraction_part = value - integral_part;
     
@@ -62,30 +38,6 @@ Radian::Radian(double value) : m_inner{value} {
 
     assert(value >= -PI);
     assert(value <= PI);
-}
-
-Radian Radian::operator+(const Radian& other) const {
-    return Radian{m_inner + other.m_inner};
-}
-Radian Radian::operator-() const {
-    return Radian{-m_inner};
-}
-
-Radian Radian::operator*(double scalar) const {
-    return Radian{m_inner * scalar};
-}
-Radian Radian::operator/(double scalar) const {
-    return Radian{m_inner / scalar};
-}
-
-bool Radian::operator<(const Radian& other) const {
-    return m_inner < other.m_inner;
-}
-bool Radian::operator>(const Radian& other) const {
-    return m_inner > other.m_inner;
-}
-bool Radian::operator==(const Radian& other) const {
-    return m_inner == other.m_inner;
 }
 
 Degree Radian::as_degree() const { 
@@ -97,32 +49,9 @@ double Radian::as_double() const { return m_inner; }
 // Centimeter Implementation
 //
 
-Centimeter::Centimeter(int value) : m_inner{value} {
+Centimeter::Centimeter(int value) {
     assert(value >= 0);
-}
-
-Centimeter Centimeter::operator+(const Centimeter& other) const { 
-    return Centimeter{m_inner + other.m_inner}; 
-}
-Centimeter Centimeter::operator-(const Centimeter& other) const { 
-    return Centimeter{m_inner - other.m_inner}; 
-}
-
-Centimeter Centimeter::operator*(int scalar) const { 
-    return Centimeter{scalar * m_inner}; 
-}
-Centimeter Centimeter::operator/(int scalar) const { 
-    return Centimeter{scalar / m_inner}; 
-}
-
-bool Centimeter::operator<(const Centimeter& other) const {
-    return m_inner < other.m_inner;
-}
-bool Centimeter::operator>(const Centimeter& other) const {
-    return m_inner > other.m_inner;
-}
-bool Centimeter::operator==(const Centimeter& other) const {
-    return m_inner == other.m_inner;
+    m_inner = value;
 }
 
 int Centimeter::as_int() const { 
