@@ -9,7 +9,11 @@ constexpr double RADIAN_TO_DEGREE_FACTOR = 180 / PI;
 // Degree Implementation
 //
 
-Degree::Degree(int value) : m_inner{value % 180} {
+Degree::Degree(double value) {
+    auto integral_part = static_cast<long long int>(value);
+    auto fraction_part = value - integral_part;
+    m_inner = (integral_part % 180) + fraction_part;
+
     assert(value >= -180);
     assert(value <= 180);
 }
@@ -22,10 +26,10 @@ Degree Degree::operator-(const Degree& other) const {
 }
 
 Degree Degree::operator*(double scalar) const { 
-    return Degree{static_cast<int>(scalar * m_inner)}; 
+    return Degree{scalar * m_inner}; 
 }
 Degree Degree::operator/(double scalar) const { 
-    return Degree{static_cast<int>(scalar / m_inner)}; 
+    return Degree{scalar / m_inner}; 
 }
 
 bool Degree::operator<(const Degree& other) const {
@@ -34,14 +38,11 @@ bool Degree::operator<(const Degree& other) const {
 bool Degree::operator>(const Degree& other) const {
     return m_inner > other.m_inner;
 }
-bool Degree::operator==(const Degree& other) const {
-    return m_inner == other.m_inner;
-}
 
 Radian Degree::as_radian() const { 
     return Radian{m_inner / RADIAN_TO_DEGREE_FACTOR};
 }
-int Degree::as_int() const { 
+double Degree::as_double() const { 
     return m_inner;
 }
 

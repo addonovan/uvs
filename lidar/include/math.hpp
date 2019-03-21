@@ -5,7 +5,7 @@ struct Radian;
 
 struct Degree final {
     public:
-        Degree(int value);
+        Degree(double value);
 
         Degree operator+(const Degree& other) const;
         Degree operator-(const Degree& other) const;
@@ -15,13 +15,12 @@ struct Degree final {
 
         bool operator<(const Degree& other) const;
         bool operator>(const Degree& other) const;
-        bool operator==(const Degree& other) const;
 
         Radian as_radian() const;
-        int as_int() const;
+        double as_double() const;
 
     private:
-        int m_inner;
+        double m_inner;
 };
 
 struct Radian final {
@@ -33,7 +32,7 @@ struct Radian final {
 
         Radian operator*(double scalar) const;
         Radian operator/(double scalar) const;
-
+        
         Degree as_degree() const;
         double as_double() const;
 
