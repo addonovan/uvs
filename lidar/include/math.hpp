@@ -50,22 +50,22 @@ struct Radian final {
 
 struct Centimeter final {
     public:
-        Centimeter(double value);
+        Centimeter(int value);
 
         Centimeter operator+(const Centimeter& other) const;
         Centimeter operator-(const Centimeter& other) const;
 
-        Centimeter operator*(double scalar) const;
-        Centimeter operator/(double scalar) const;
+        Centimeter operator*(int scalar) const;
+        Centimeter operator/(int scalar) const;
         
         bool operator<(const Centimeter& other) const;
         bool operator>(const Centimeter& other) const;
         bool operator==(const Centimeter& other) const;
         
-        double as_double() const;
+        int as_int() const;
 
     private:
-        double m_inner;
+        int m_inner;
 };
 
 /**
