@@ -30,10 +30,13 @@ Degree calculate_deflection_component(const SensorReading& reading) {
     double weight = thresh - reading.distance.as_int();
     weight /= thresh;
 
-    // invert the angle and that's the direction our robot should be going
-    // in (possible because 0° is directly forward) 
-    Degree direction = -reading.angle;
+    // try to go 90° away from the problem direction
+    Degree direction = reading.angle >= 0 ?
+        reading.angle - 90 : 90 - reading.angle;
 
+    // scale that angle down by the weight (if the object is further away,
+    // we don't need to take as drastic measures to avoid it as if it were
+    // closer)
     return weight * direction;
 }
 
