@@ -38,6 +38,9 @@ bool Degree::operator<(const Degree& other) const {
 bool Degree::operator>(const Degree& other) const {
     return m_inner > other.m_inner;
 }
+bool Degree::operator==(const Degree& other) const {
+    return m_inner == other.m_inner;
+}
 
 Radian Degree::as_radian() const { 
     return Radian{m_inner / RADIAN_TO_DEGREE_FACTOR};
@@ -75,8 +78,18 @@ Radian Radian::operator/(double scalar) const {
     return Radian{m_inner / scalar};
 }
 
+bool Radian::operator<(const Radian& other) const {
+    return m_inner < other.m_inner;
+}
+bool Radian::operator>(const Radian& other) const {
+    return m_inner > other.m_inner;
+}
+bool Radian::operator==(const Radian& other) const {
+    return m_inner == other.m_inner;
+}
+
 Degree Radian::as_degree() const { 
-    return Degree{static_cast<int>(m_inner * RADIAN_TO_DEGREE_FACTOR)};
+    return Degree{m_inner * RADIAN_TO_DEGREE_FACTOR};
 }
 double Radian::as_double() const { return m_inner; }
 

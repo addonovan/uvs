@@ -18,7 +18,7 @@
  * - reading.distance is a int measuring centimeters
  * - reading.distance will not be below about 15 cm
  */
-double calculate_deflection_component(const SensorReading& reading) {
+Degree calculate_deflection_component(const SensorReading& reading) {
     const int THRESHOLD = 200;
     if (reading.distance > THRESHOLD) {
         return 0.0;
@@ -39,18 +39,17 @@ double calculate_deflection_component(const SensorReading& reading) {
     return severity * direction;
 }
 
-double weight_for(int angle) {
-    assert(angle > -180);
-    assert(angle <= 180);
+double weight_for(const Radian& angle) {
+    Degree deg_angle = angle.as_degree(); 
 
-    // throw out any angles behind the rover
-    if (angle > 90 || angle < -90) {
-        return 0;
+    // throw out any deg_angles behind the rover
+    if (deg_angle > 90.0 || deg_angle < -90.0) {
+        return 0.0;
     }
     
     // bring to interval [0, 1] where 
-    //      angle = 0 => weight = 1
-    double weight = (90.0 - angle) / 90.0; 
+    //      deg_angle = 0 => weight = 1
+    double weight = (90.0 - deg_angle.as_double()) / 90.0; 
 
     // decrease the weight of going to the left or right
     weight = pow(weight, 2);
@@ -58,9 +57,9 @@ double weight_for(int angle) {
     return weight;
 }
 
-double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
-    double angle_end = message->angle_max;
-    double angle_step = message->angle_increment;
+Degree calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
+    Radian angle_end = message->angle_max;
+    Radian angle_step = message->angle_increment;
     double min_distance = message->range_min;
     double max_distance = message->range_max;
 
@@ -68,10 +67,10 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
     // (ax + by + cz) / (a + b + c) => weighted average of x, y, z
     // \____________/                  deflection accumulator
     //                  \_________/    weight accumulator
-    double deflection_accumulator = 0.0;
+    Degree deflection_accumulator = 0.0;
     double weight_accumulator = 0.0;
 
-    double angle = message->angle_min;
+    Radian angle = message->angle_min;
     for (int i = 0; angle < angle_end; i++, angle += angle_step) {
         // skip over invalid readings
         double distance = message->ranges[i];
@@ -82,14 +81,15 @@ double calculate_deflection(const sensor_msgs::LaserScan::ConstPtr& message) {
         } 
         
         // from experimentation 0.20 range is about 15cm
-        SensorReading reading;
-        reading.distance = static_cast<int>(distance * 15 / 0.20);
-        reading.angle = static_cast<int>(rad2deg(angle));
+        SensorReading reading{
+                static_cast<int>(distance * 15.0 / 0.20),
+                angle.as_degree()
+        };
 
         // calculate the deflection, and its weight
         double weight = weight_for(angle);
-        double deflection = calculate_deflection_component(reading);
-        deflection_accumulator += weight * deflection;
+        Degree deflection = calculate_deflection_component(reading);
+        deflection_accumulator += deflection * weight;
         weight_accumulator += weight; 
     }
 

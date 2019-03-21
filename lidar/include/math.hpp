@@ -1,5 +1,7 @@
 #pragma once
 
+#include "utility.hpp"
+
 struct Degree;
 struct Radian;
 
@@ -15,6 +17,7 @@ struct Degree final {
 
         bool operator<(const Degree& other) const;
         bool operator>(const Degree& other) const;
+        bool operator==(const Degree& other) const;
 
         Radian as_radian() const;
         double as_double() const;
@@ -32,6 +35,10 @@ struct Radian final {
 
         Radian operator*(double scalar) const;
         Radian operator/(double scalar) const;
+        
+        bool operator<(const Radian& other) const;
+        bool operator>(const Radian& other) const;
+        bool operator==(const Radian& other) const;
         
         Degree as_degree() const;
         double as_double() const;

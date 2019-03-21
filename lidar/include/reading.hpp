@@ -3,12 +3,13 @@
 #include <vector>
 #include <sensor_msgs/LaserScan.h>
 
+#include "math.hpp"
+
 struct SensorReading final {
     public:
-        int distance;
-        int angle;
-};
+        SensorReading(int dist, Degree ang) : distance{dist}, angle{ang} {}
 
-std::vector<SensorReading> 
-convert_readings(const sensor_msgs::LaserScan::ConstPtr& data);
+        int distance;
+        Degree angle;
+};
 
