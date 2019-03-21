@@ -17,14 +17,15 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
 #ifndef NDEBUG
     hrclock::time_point start = hrclock::now();
 #endif
+
     Degree deflection = calculate_deflection(message);
+
 #ifndef NDEBUG
     hrclock::time_point end = hrclock::now();
 
     // ambiguous call to operator- here, so we have to manually choose which
     // template we want to instantiate (this part is 100% my fault but whatever)
-    auto diff = std::chrono::operator-(end, start);
-    auto calc_duration = duration_cast<duration<double>>(diff);
+    auto calc_duration = duration_cast<duration<double>>(end - start);
 
     // if we took more than 1/4th of the time needed to complete a scan, then
     // we need to issue a warning because that's bad!
