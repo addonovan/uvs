@@ -4,6 +4,7 @@
 
 struct Degree;
 struct Radian;
+struct Centimeter;
 
 struct Degree final {
     public:
@@ -41,6 +42,26 @@ struct Radian final {
         bool operator==(const Radian& other) const;
         
         Degree as_degree() const;
+        double as_double() const;
+
+    private:
+        double m_inner;
+};
+
+struct Centimeter final {
+    public:
+        Centimeter(double value);
+
+        Centimeter operator+(const Centimeter& other) const;
+        Centimeter operator-(const Centimeter& other) const;
+
+        Centimeter operator*(double scalar) const;
+        Centimeter operator/(double scalar) const;
+        
+        bool operator<(const Centimeter& other) const;
+        bool operator>(const Centimeter& other) const;
+        bool operator==(const Centimeter& other) const;
+        
         double as_double() const;
 
     private:

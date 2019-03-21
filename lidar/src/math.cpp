@@ -94,6 +94,42 @@ Degree Radian::as_degree() const {
 double Radian::as_double() const { return m_inner; }
 
 //
+// Centimeter Implementation
+//
+
+Centimeter::Centimeter(double value) : m_inner{value} {
+    assert(value >= 0);
+}
+
+Centimeter Centimeter::operator+(const Centimeter& other) const { 
+    return Centimeter{m_inner + other.m_inner}; 
+}
+Centimeter Centimeter::operator-(const Centimeter& other) const { 
+    return Centimeter{m_inner - other.m_inner}; 
+}
+
+Centimeter Centimeter::operator*(double scalar) const { 
+    return Centimeter{scalar * m_inner}; 
+}
+Centimeter Centimeter::operator/(double scalar) const { 
+    return Centimeter{scalar / m_inner}; 
+}
+
+bool Centimeter::operator<(const Centimeter& other) const {
+    return m_inner < other.m_inner;
+}
+bool Centimeter::operator>(const Centimeter& other) const {
+    return m_inner > other.m_inner;
+}
+bool Centimeter::operator==(const Centimeter& other) const {
+    return m_inner == other.m_inner;
+}
+
+double Centimeter::as_double() const { 
+    return m_inner;
+}
+
+//
 // Conversion
 //
 
