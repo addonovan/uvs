@@ -7,7 +7,7 @@ const double PI = 3.1416; // rounded up for comparisons
 const double HALF_PI = PI / 2;
 const double TAU = 2 * PI;
 
-const double THRESHOLD = 100.0; // [cm]
+const double THRESHOLD = 50.0; // [cm]
 
 struct Reading { double angle, range; };
 
