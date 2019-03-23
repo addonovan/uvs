@@ -7,7 +7,7 @@ const double PI = 3.1416; // rounded up for comparisons
 const double HALF_PI = PI / 2;
 const double TAU = 2 * PI;
 
-const double THRESHOLD = 1.00; // [m]
+const double THRESHOLD = 100.0; // [cm]
 
 struct Reading { double angle, range; };
 
@@ -32,6 +32,11 @@ bool is_valid_reading(
         double range, 
         double angle
 ) {
+    // ported from the following matlab code:
+    // validIdx = (angles >= -pi/2) & (angles <= pi/2);
+    // ... 
+    // angles = angles(validIdx);
+
     // get rid of values the lidar has marked as faulty
     if (!std::isfinite(range)) return false;
     if (range < range_min) return false;
@@ -54,7 +59,7 @@ Reading find_min_reading(const sensor_msgs::LaserScan::ConstPtr& message) {
     // iterate through all ranges, keeping track of its position (because we
     // need it to keep track of which angle we're at)
     int i = 0;
-    for (const double range : message->ranges) {
+    for (double range : message->ranges) {
         double angle = get_angle(angle_min, angle_step, i++); 
 
         // skip invalid readings
@@ -69,15 +74,28 @@ Reading find_min_reading(const sensor_msgs::LaserScan::ConstPtr& message) {
         }
     }
 
+    min_reading.range *= 100.0; // convert [m] to [cm]
     return min_reading;
 }
 
 double calculate_deflection(Reading reading) {
-    // function is guaranteed to only be called when an actual min reading
-    // is found
+    // converted from following matlab code:
+    // if (~isempty(lidar_range) && lidar_range <= lidar_threshold)
+    //      if lidar_angle >= 0
+    //          theta_change = -(lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
+    //      elseif lidar_angle<0
+    //          theta_change = (lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
+    //      end
+    //      ...
+    // end
+    //
+    // - abs(theta_change) is the same on both branches
+    // - isempty(lidar_range) is for when there're no readings, but that's 
+    //   handled by the calling function (guaranteed by our assertions)
+
     assert(std::isfinite(reading.range));  
     assert(std::isfinite(reading.angle));
-  
+
     // ignore values over the threshold 
     if (reading.range > THRESHOLD) {
         return 0.0; 
@@ -108,7 +126,9 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     std_msgs::Float64 range;
     range.data = reading.range; 
     range_pub->publish(range);
-    
+   
+    // publish no deflection, unless we actually find a valid reading and
+    // then we'll publish that deflection 
     double deflection = 0.0;
     if (std::isfinite(reading.range)) {
         deflection = calculate_deflection(reading);
