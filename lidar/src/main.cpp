@@ -21,7 +21,7 @@ double get_angle(double min, double step, int i) {
     // AngleIncrement => step
     // AngleMin => min
 
-    double angle = PI - (min + (step * i));
+    double angle = PI - min + (step * i);
     angle = -(angle - TAU * std::floor((angle + PI)/TAU));
     return angle;
 }
