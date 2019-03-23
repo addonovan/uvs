@@ -14,7 +14,9 @@ catkin_package()
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(lidar src/math.cpp src/deflection.cpp src/main.cpp)
+#SET(SOURCES src/math.cpp src/deflection.cpp src/main.cpp)
+SET(SOURCES src/main.cpp)
+add_executable(lidar ${SOURCES})
 target_link_libraries(lidar ${catkin_LIBRARIES})
 
 # %EndTag(FULLTEXT)%
