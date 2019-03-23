@@ -26,7 +26,6 @@ bool is_valid_reading(
     if (range < range_min) return false;
     if (range > range_max) return false;
     if (!std::isfinite(range)) return false;
-    if (range < THRESHOLD) return false;
 
     return angle >= -HALF_PI && angle <= HALF_PI;
 }
@@ -59,12 +58,28 @@ Reading find_min_reading(const sensor_msgs::LaserScan::ConstPtr& message) {
     return min_reading;
 }
 
+double calculate_deflection(Reading reading) {
+    assert(std::isfinite(reading.range)); // infinite values represent no readings 
+    assert(std::isfinite(reading.angle));
+   
+    if (reading.range > THRESHOLD) {
+        return 0.0; 
+    }
+
+    // calculate the magnitude of the angle
+    double mag = pow(THRESHOLD - reading.range, 2) * (3 * PI / 4) / pow(THRESHOLD, 2);
+
+    // multiply by the direction of the angle
+    return mag * (reading.angle >= 0 ? -1 : 1);
+}
+
 //
 // ROS Stuff
 //
 
 ros::Publisher* angle_pub = nullptr;
 ros::Publisher* range_pub = nullptr;
+ros::Publisher* dflxn_pub = nullptr;
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     Reading reading = find_min_reading(message);
@@ -76,6 +91,15 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     std_msgs::Float64 range;
     range.data = reading.range; 
     range_pub->publish(range);
+    
+    double deflection = 0.0;
+    if (std::isfinite(reading.range)) {
+        deflection = calculate_deflection(reading);
+    }
+    std_msgs::Float64 dflxn;
+    dflxn.data = deflection; 
+    dflxn_pub->publish(dflxn);
+
 }
 
 int main(int argc, char** argv) {
@@ -88,6 +112,9 @@ int main(int argc, char** argv) {
 
     ros::Publisher range_pub = n.advertise<std_msgs::Float64>("min_lidar_range", 1);
     ::range_pub = &range_pub;
+
+    ros::Publisher dflxn_pub = n.advertise<std_msgs::Float64>("theta_deflection", 1);
+    ::dflxn_pub = &dflxn_pub;
 
     // set up the subscriber
     ros::Subscriber sub = n.subscribe("scan", 1, on_lidar_message);
