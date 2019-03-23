@@ -1,13 +1,15 @@
 #include <cmath>
 #include <ros/ros.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/UInt16.h>
 #include <sensor_msgs/LaserScan.h>
 
 const double PI = 3.1416; // rounded up for comparisons
 const double HALF_PI = PI / 2;
 const double TAU = 2 * PI;
 
-const double THRESHOLD = 50.0; // [cm]
+const double LIDAR_THRESHOLD = 100.0; // [cm]
+const double SONAR_THRESHOLD =  50.0; // [cm]
 
 struct Reading { double angle, range; };
 
@@ -97,12 +99,12 @@ double calculate_deflection(Reading reading) {
     assert(std::isfinite(reading.angle));
 
     // ignore values over the threshold 
-    if (reading.range > THRESHOLD) {
+    if (reading.range > LIDAR_THRESHOLD) {
         return 0.0; 
     }
 
     // calculate the magnitude of the angle
-    double mag = pow(THRESHOLD - reading.range, 2) * (3 * PI / 4) / pow(THRESHOLD, 2);
+    double mag = pow(LIDAR_THRESHOLD - reading.range, 2) * (3 * PI / 4) / pow(LIDAR_THRESHOLD, 2);
 
     // multiply by the direction of the angle
     return mag * (reading.angle >= 0 ? -1 : 1);
@@ -114,7 +116,8 @@ double calculate_deflection(Reading reading) {
 
 ros::Publisher* angle_pub = nullptr;
 ros::Publisher* range_pub = nullptr;
-ros::Publisher* dflxn_pub = nullptr;
+ros::Publisher* lidar_pub = nullptr;
+ros::Publisher* sonar_pub = nullptr;
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     Reading reading = find_min_reading(message);
@@ -133,10 +136,31 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     if (std::isfinite(reading.range)) {
         deflection = calculate_deflection(reading);
     }
-    std_msgs::Float64 dflxn;
-    dflxn.data = deflection; 
-    dflxn_pub->publish(dflxn);
+    if (abs(deflection) > 0.0009) {
+        ROS_INFO(
+                "LIDAR Deflection: %-1.3lf [rad]  Obstacle @ %-3.0lf [cm] @ %-1.3lf [rad]", 
+                deflection, 
+                reading.range, 
+                reading.angle
+        );
+    }
+    std_msgs::Float64 lidar;
+    lidar.data = deflection; 
+    lidar_pub->publish(lidar);
+}
 
+void on_sonar_message(const std_msgs::UInt16::ConstPtr& message) {
+    double range = message->data / 10.0; // convert [mm] to [cm]
+
+    double deflection = 0.0;
+    if (range < SONAR_THRESHOLD) {
+        deflection = pow(SONAR_THRESHOLD - range, 2) * (3 * PI / 4) / pow(SONAR_THRESHOLD, 2);
+        ROS_INFO("SONAR Deflection: %-1.3lf [rad]  Obstacle @ %-3.0lf [cm]", deflection, range);
+    }
+        
+    std_msgs::Float64 sonar;
+    sonar.data = deflection;
+    sonar_pub->publish(sonar);
 }
 
 int main(int argc, char** argv) {
@@ -150,11 +174,15 @@ int main(int argc, char** argv) {
     ros::Publisher range_pub = n.advertise<std_msgs::Float64>("min_lidar_range", 1);
     ::range_pub = &range_pub;
 
-    ros::Publisher dflxn_pub = n.advertise<std_msgs::Float64>("theta_deflection", 1);
-    ::dflxn_pub = &dflxn_pub;
+    ros::Publisher sonar_pub = n.advertise<std_msgs::Float64>("sonar_deflection", 1);
+    ::sonar_pub = &sonar_pub;
+    
+    ros::Publisher lidar_pub = n.advertise<std_msgs::Float64>("lidar_deflection", 1);
+    ::lidar_pub = &lidar_pub;
 
     // set up the subscriber
-    ros::Subscriber sub = n.subscribe("scan", 1, on_lidar_message);
+    ros::Subscriber lidar_subscriber = n.subscribe("scan", 1, on_lidar_message);
+    ros::Subscriber sonar_subscriber = n.subscribe("sonar", 1, on_sonar_message);
 
     // run endlessly
     ROS_INFO("Initialized lidar reactive control system");
