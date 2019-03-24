@@ -7,6 +7,8 @@
 #include <std_msgs/UInt16.h>
 #include <sensor_msgs/LaserScan.h>
 
+#include <units.hpp>
+
 const double PI = 3.1416; // rounded up for comparisons
 const double HALF_PI = PI / 2;
 const double TAU = 2 * PI;

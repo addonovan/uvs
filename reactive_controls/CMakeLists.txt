@@ -1,4 +1,3 @@
-# %Tag(FULLTEXT)%
 cmake_minimum_required(VERSION 2.8.3)
 project(reactive_controls)
 
@@ -11,9 +10,8 @@ catkin_package()
 ## Build talker and listener
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-#SET(SOURCES src/math.cpp src/deflection.cpp src/main.cpp)
-SET(SOURCES src/main.cpp)
-add_executable(reactive_controls ${SOURCES})
-target_link_libraries(reactive_controls ${catkin_LIBRARIES})
+file(GLOB_RECURSE sources src/*.cpp)
+file(GLOB_RECURSE include include/*.hpp) # only for IDE support
 
-# %EndTag(FULLTEXT)%
+add_executable(reactive_controls ${include} ${sources})
+target_link_libraries(reactive_controls ${catkin_LIBRARIES})
