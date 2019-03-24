@@ -3,6 +3,12 @@
 
 #include <units.hpp>
 
+#include <boost/math/constants/constants.hpp>
+
+constexpr double PI = boost::math::constants::pi<double>();
+constexpr double DEGREE_TO_RADIAN_COEFFICIENT = PI / 180.0;
+constexpr double RADIAN_TO_DEGREE_COEFFICIENT = 180.0 / PI;
+
 //
 // Radian
 //
@@ -13,6 +19,11 @@ Radian::Radian(double inner) : NumericType(inner) {
     }
 }
 
+Degree
+Radian::as_degree() const noexcept {
+    return Degree{m_inner * RADIAN_TO_DEGREE_COEFFICIENT};
+}
+
 //
 // Degree
 //
@@ -21,6 +32,11 @@ Degree::Degree(double inner) : NumericType(inner) {
     if (!std::isfinite(inner)) {
         throw std::runtime_error{"Non-finite value of degrees not permitted!"};
     }
+}
+
+Radian
+Degree::as_radian() const noexcept {
+    return Radian{m_inner * DEGREE_TO_RADIAN_COEFFICIENT};
 }
 
 //
