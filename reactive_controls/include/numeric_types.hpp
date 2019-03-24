@@ -46,29 +46,34 @@ class NumericType {
 template<class Self>
 class PartialOrdering {
 
+  public:
+
     bool operator<(const Self& other) const noexcept {
-        return static_cast<Self>(this)->m_inner < other.m_inner;
+        return **static_cast<const Self*>(this) < *other;
     }
 
     bool operator>(const Self& other) const noexcept {
-        return static_cast<Self>(this)->m_inner > other.m_inner;
+        return **static_cast<const Self*>(this) > *other;
+
     }
 
 };
 
 template<class Self>
-class TotalOrdering : PartialOrdering<Self> {
+class TotalOrdering : public PartialOrdering<Self> {
+
+  public:
 
     bool operator==(const Self& other) const noexcept {
-        return static_cast<Self>(this)->m_inner < other.m_inner;
+        return **static_cast<const Self*>(this) == *other;
     }
 
     bool operator<=(const Self& other) const noexcept {
-        return *this < other || *this == other;
+        return !(*this > other);
     }
 
     bool operator>=(const Self& other) const noexcept {
-        return *this > other || *this == other;
+        return !(*this < other);
     }
 
 };
