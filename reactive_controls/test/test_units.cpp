@@ -5,6 +5,7 @@
 TEST(TestUnitValues, CentimeterOperators) {
     auto a = Centimeter{10};
     auto b = Centimeter{5};
+    auto c = Centimeter{17};
 
     ASSERT_EQ(*(a + b), 15);
     ASSERT_EQ(*(a - b), 5);
@@ -12,8 +13,8 @@ TEST(TestUnitValues, CentimeterOperators) {
     ASSERT_EQ(*(a * 5), 50);
     ASSERT_EQ(*(a / 5), 2);
 
-    a += b; ASSERT_EQ(*a, 15);
-    a -= b; ASSERT_EQ(*a, 10);
-    a *= 5; ASSERT_EQ(*a, 50);
-    a /= 5; ASSERT_EQ(*a, 10);
+    a += c; ASSERT_EQ(*a, 27);
+    a -= c; ASSERT_EQ(*a, 10);
+    a *= 6; ASSERT_EQ(*a, 60);
+    a /= 6; ASSERT_EQ(*a, 10);
 }
