@@ -98,3 +98,17 @@ TEST(TestUnits, degreeRejectsNonfiniteValues) {
         ADD_FAILURE() << "Degree accepted a signaling NaN value";
     } catch (...) {}
 }
+
+TEST(TestUnits, angleConversions) {
+    const Degree MAX_ALLOWABLE_DEGREE_DELTA = 0.01;
+    const Radian MAX_ALLOWABLE_RADIAN_DELTA = MAX_ALLOWABLE_DEGREE_DELTA.as_radian();
+
+    auto a = Degree{90};
+    auto b = Radian{PI / 2.0};
+
+    ASSERT_TRUE(a.as_radian() - MAX_ALLOWABLE_RADIAN_DELTA < b);
+    ASSERT_TRUE(a.as_radian() + MAX_ALLOWABLE_RADIAN_DELTA > b);
+
+    ASSERT_TRUE(b.as_degree() - MAX_ALLOWABLE_DEGREE_DELTA < a);
+    ASSERT_TRUE(b.as_degree() + MAX_ALLOWABLE_DEGREE_DELTA > a);
+}

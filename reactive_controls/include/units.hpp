@@ -2,7 +2,11 @@
 #pragma ide diagnostic ignored "google-explicit-constructor"
 #pragma once
 
+#include <boost/math/constants/constants.hpp>
+
 #include "numeric_types.hpp"
+
+constexpr double PI = boost::math::constants::pi<double>();
 
 struct Radian;
 struct Degree;

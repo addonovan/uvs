@@ -3,9 +3,6 @@
 
 #include <units.hpp>
 
-#include <boost/math/constants/constants.hpp>
-
-constexpr double PI = boost::math::constants::pi<double>();
 constexpr double DEGREE_TO_RADIAN_COEFFICIENT = PI / 180.0;
 constexpr double RADIAN_TO_DEGREE_COEFFICIENT = 180.0 / PI;
 
