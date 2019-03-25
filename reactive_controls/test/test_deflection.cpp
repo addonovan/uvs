@@ -76,16 +76,16 @@ TEST(TestDeflection, findsSmallestReading) {
         range_min, range_max,
         entries
     );
-    ASSERT_FLOAT_EQ(reading.range, 5000.0);
-    ASSERT_FLOAT_EQ(reading.angle, get_angle(angle_min, angle_step, 3));
+    ASSERT_FLOAT_EQ(*reading.range, 5000.0);
+    ASSERT_FLOAT_EQ(*reading.angle, get_angle(angle_min, angle_step, 3));
 
     reading = find_min_reading(
         angle_min, angle_step,
         100.0, range_max,
         entries
     );
-    ASSERT_FLOAT_EQ(reading.range, 12500.0);
-    ASSERT_FLOAT_EQ(reading.angle, get_angle(angle_min, angle_step, 2));
+    ASSERT_FLOAT_EQ(*reading.range, 12500.0);
+    ASSERT_FLOAT_EQ(*reading.angle, get_angle(angle_min, angle_step, 2));
 }
 
 TEST(TestDeflection, deflectionOutOfRange) {

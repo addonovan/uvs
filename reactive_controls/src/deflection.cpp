@@ -48,7 +48,8 @@ Reading find_min_reading(
     double range_max,
     const std::vector<float>& ranges
 ) {
-    Reading min_reading{1.0 / 0.0, 1.0 / 0.0};
+    double min_angle = 1.0 / 0.0;
+    double min_range = 1.0 / 0.0;
 
     // iterate through all ranges, keeping track of its position (because we
     // need it to keep track of which angle we're at)
@@ -62,14 +63,17 @@ Reading find_min_reading(
         }
 
         // record only the minimum range along with the angle that generated it
-        if (range < min_reading.range) {
-            min_reading.range = range;
-            min_reading.angle = angle;
+        if (range < min_range) {
+            min_range = range;
+            min_angle = angle;
         }
     }
 
-    min_reading.range *= 100.0; // convert [m] to [cm]
-    return min_reading;
+    Radian angle = min_angle;
+    Centimeter range = static_cast<int>(min_range * 100.0);
+
+    Reading reading{angle, range};
+    return reading;
 }
 
 double calculate_deflection(const Reading& reading) {
@@ -87,17 +91,14 @@ double calculate_deflection(const Reading& reading) {
     // - isempty(lidar_range) is for when there're no readings, but that's
     //   handled by the calling function (guaranteed by our assertions)
 
-    assert(std::isfinite(reading.range));
-    assert(std::isfinite(reading.angle));
-
     // ignore values over the threshold
     if (reading.range > LIDAR_THRESHOLD) {
         return 0.0;
     }
 
     // calculate the magnitude of the angle
-    double mag = pow(LIDAR_THRESHOLD - reading.range, 1) * (3 * PI / 4) / pow(LIDAR_THRESHOLD, 1);
+    double mag = *(LIDAR_THRESHOLD - reading.range) * (3 * PI / 4) / *LIDAR_THRESHOLD;
 
     // multiply by the direction of the angle
-    return mag * (reading.angle >= 0 ? -1 : 1);
+    return mag * (reading.angle > 0 ? -1 : 1);
 }

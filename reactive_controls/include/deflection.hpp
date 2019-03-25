@@ -2,12 +2,14 @@
 
 #include <vector>
 
-const double LIDAR_THRESHOLD = 100.0; // [cm]
+#include "units.hpp"
+
+const Centimeter LIDAR_THRESHOLD = 100;
 const double SONAR_THRESHOLD = -10.0; // [cm]
 
 struct Reading {
-    double angle;
-    double range;
+    Radian angle;
+    Centimeter range;
 };
 
 double get_angle(double min, double step, int i);
