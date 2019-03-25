@@ -17,11 +17,11 @@
 ros::Publisher* publisher = nullptr;
 std::mutex mtx_publisher;
 
-double lidar_deflection = 0.0 / 0.0;
-double sonar_deflection = 0.0 / 0.0;
+Radian lidar_deflection;
+Radian sonar_deflection;
 
 template<bool IsSonar>
-void publish_deflection(double deflection) {
+void publish_deflection(Radian deflection) {
     std::lock_guard<std::mutex> lock{mtx_publisher};
     std_msgs::Float64 message;
 
@@ -32,9 +32,9 @@ void publish_deflection(double deflection) {
     }
 
     if (sonar_deflection > 0.0) {
-        message.data = sonar_deflection;
+        message.data = *sonar_deflection;
     } else if (lidar_deflection > 0.0) {
-        message.data = lidar_deflection;
+        message.data = *lidar_deflection;
     } else {
         message.data = 0.0;
     }
@@ -47,7 +47,7 @@ void publish_deflection(double deflection) {
 //
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
-    Reading reading = find_min_reading(
+    auto readings = map_readings(
         message->angle_min,
         message->angle_increment,
         message->range_min,
@@ -56,30 +56,23 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     );
 
     // publish no deflection, unless we actually find a valid reading and
-    // then we'll publish that deflection 
-    double deflection = 0.0;
-    if (std::isfinite(reading.range)) {
-        deflection = calculate_deflection(reading);
-    }
-    if (abs(deflection) > 0.0009) {
-        ROS_INFO(
-                "LIDAR Deflection: %+1.3lf [rad]  Obstacle @ %3.0lf [cm] @ %+1.3lf [rad]", 
-                deflection, 
-                reading.range, 
-                reading.angle
-        );
+    // then we'll publish that deflection
+    Radian deflection = calculate_deflection(readings);
+    if (abs(*deflection) > 0.0009) {
+        ROS_INFO("LIDAR Deflection: %+1.3lf [rad]", *deflection);
     }
 
-    publish_deflection<false>(deflection);    
+    publish_deflection<false>(deflection);
 }
 
 void on_sonar_message(const std_msgs::UInt16::ConstPtr& message) {
-    double range = message->data / 10.0; // convert [mm] to [cm]
+    Centimeter range = static_cast<int>(message->data / 10); // convert [mm] to [cm]
 
-    double deflection = 0.0;
+    Radian deflection;
+
     if (range < SONAR_THRESHOLD) {
-        deflection = pow(SONAR_THRESHOLD - range, 1) * (3 * PI / 4) / pow(SONAR_THRESHOLD, 1);
-        ROS_INFO("SONAR Deflection: %+1.3lf [rad]  Obstacle @ %3.0lf [cm]", deflection, range);
+        deflection = *(SONAR_THRESHOLD - range) * (3 * PI / 4) / *SONAR_THRESHOLD;
+        ROS_INFO("SONAR Deflection: %+1.3lf [rad]", *deflection);
     }
     
     publish_deflection<true>(deflection);    

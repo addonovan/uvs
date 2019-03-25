@@ -5,7 +5,7 @@
 #include "units.hpp"
 
 const Centimeter LIDAR_THRESHOLD = 100;
-const double SONAR_THRESHOLD = -10.0; // [cm]
+const Centimeter SONAR_THRESHOLD = -10;
 
 struct Reading {
     Radian angle;

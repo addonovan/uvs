@@ -16,6 +16,8 @@ struct Radian final : NumericType<Radian, double>, PartialOrdering<Radian> {
 
   public:
 
+    Radian();
+
     Radian(double inner);
 
     Degree as_degree() const noexcept;

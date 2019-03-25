@@ -10,6 +10,8 @@ constexpr double RADIAN_TO_DEGREE_COEFFICIENT = 180.0 / PI;
 // Radian
 //
 
+Radian::Radian() : NumericType(0.0) {}
+
 Radian::Radian(double inner) : NumericType(inner) {
     if (!std::isfinite(inner)) {
         throw std::runtime_error{"Non-finite value of radians not permitted!"};
