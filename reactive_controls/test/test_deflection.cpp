@@ -95,11 +95,13 @@ TEST(TestDeflection, findsSmallestReading) {
 }
 
 TEST(TestDeflection, deflectionOutOfRange) {
-    auto reading = Reading{0.0, LIDAR_THRESHOLD + 50};
-    assert_kinda_equal(calculate_deflection(reading), 0.0);
+    auto readings = std::vector<Reading>{{
+        Reading{0.0, LIDAR_THRESHOLD + 50}
+    }};
+    assert_kinda_equal(*calculate_deflection(readings), 0.0);
 
-    reading.range = LIDAR_THRESHOLD + 1;
-    assert_kinda_equal(calculate_deflection(reading), 0.0);
+    readings[0].range = LIDAR_THRESHOLD + 1;
+    assert_kinda_equal(*calculate_deflection(readings), 0.0);
 }
 
 TEST(TestDeflection, deflectionInRange) {
@@ -121,19 +123,21 @@ TEST(TestDeflection, deflectionInRange) {
 }
 
 TEST(TestDeflection, deflectionProperties) {
-    auto reading = Reading{0, 0};
+    auto readings = std::vector<Reading>{{
+        Reading{0, 0}
+    }};
 
     // as the angle increases, the value should always become more negative
     double previous_deflection = 1.0 / 0.0;
-    while (reading.angle < PI / 2) {
-        double deflection = calculate_deflection(reading);
+    while (readings[0].angle < PI / 2) {
+        double deflection = *calculate_deflection(readings);
 
         if (std::isfinite(previous_deflection)) {
             ASSERT_GE(previous_deflection, deflection);
         }
 
         previous_deflection = deflection;
-        reading.angle += PI / 16.0;
+        readings[0].angle += PI / 16.0;
     }
 
     // this is peek STL right here...
@@ -146,11 +150,11 @@ TEST(TestDeflection, deflectionProperties) {
     for (int i = 0; i < 100; i++) {
         double angle = distribution(generator);
 
-        reading.angle = angle;
-        double a = calculate_deflection(reading);
+        readings[0].angle = angle;
+        double a = *calculate_deflection(readings);
 
-        reading.angle = -angle;
-        double b = calculate_deflection(reading);
+        readings[0].angle = -angle;
+        double b = *calculate_deflection(readings);
         ASSERT_FLOAT_EQ(a, -b);
     }
 }

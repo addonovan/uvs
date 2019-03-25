@@ -42,33 +42,6 @@ bool is_valid_reading(
     return angle >= -HALF_PI && angle <= HALF_PI;
 }
 
-double calculate_deflection(const Reading& reading) {
-    // converted from following matlab code:
-    // if (~isempty(lidar_range) && lidar_range <= lidar_threshold)
-    //      if lidar_angle >= 0
-    //          theta_change = -(lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
-    //      elseif lidar_angle<0
-    //          theta_change = (lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
-    //      end
-    //      ...
-    // end
-    //
-    // - abs(theta_change) is the same on both branches
-    // - isempty(lidar_range) is for when there're no readings, but that's
-    //   handled by the calling function (guaranteed by our assertions)
-
-    // ignore values over the threshold
-    if (reading.range > LIDAR_THRESHOLD) {
-        return 0.0;
-    }
-
-    // calculate the magnitude of the angle
-    double mag = *(LIDAR_THRESHOLD - reading.range) * (3 * PI / 4) / *LIDAR_THRESHOLD;
-
-    // multiply by the direction of the angle
-    return mag * (reading.angle > 0 ? -1 : 1);
-}
-
 Reading find_min_reading(
     double angle_min,
     double angle_step,

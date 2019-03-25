@@ -29,8 +29,6 @@ Reading find_min_reading(
     const std::vector<float>& ranges
 );
 
-double calculate_deflection(const Reading& reading);
-
 std::vector<Reading> map_readings(
     double angle_min,
     double angle_step,
