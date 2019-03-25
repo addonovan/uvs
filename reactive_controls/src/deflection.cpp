@@ -42,41 +42,6 @@ bool is_valid_reading(
     return angle >= -HALF_PI && angle <= HALF_PI;
 }
 
-Reading find_min_reading(
-    double angle_min,
-    double angle_step,
-    double range_min,
-    double range_max,
-    const std::vector<float>& ranges
-) {
-    double min_angle = 1.0 / 0.0;
-    double min_range = 1.0 / 0.0;
-
-    // iterate through all ranges, keeping track of its position (because we
-    // need it to keep track of which angle we're at)
-    int i = 0;
-    for (double range : ranges) {
-        double angle = get_angle(angle_min, angle_step, i++);
-
-        // skip invalid readings
-        if (!is_valid_reading(range_min, range_max, range, angle)) {
-            continue;
-        }
-
-        // record only the minimum range along with the angle that generated it
-        if (range < min_range) {
-            min_range = range;
-            min_angle = angle;
-        }
-    }
-
-    Radian angle = min_angle;
-    Centimeter range = static_cast<int>(min_range * 100.0);
-
-    Reading reading{angle, range};
-    return reading;
-}
-
 std::vector<Reading> map_readings(
     double angle_min,
     double angle_step,

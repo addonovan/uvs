@@ -21,14 +21,6 @@ bool is_valid_reading(
     double angle
 );
 
-Reading find_min_reading(
-    double angle_min,
-    double angle_step,
-    double range_min,
-    double range_max,
-    const std::vector<float>& ranges
-);
-
 std::vector<Reading> map_readings(
     double angle_min,
     double angle_step,

@@ -57,43 +57,6 @@ TEST(TestDeflection, readingsWithinAngleRange) {
 
 }
 
-TEST(TestDeflection, findsSmallestReading) {
-    double angle_min = 0.0;
-    double angle_step = PI / 4;
-    double range_min = 0.0;
-    double range_max = 1.0 / 0.0;
-
-    // supplied distances in [m], values returned in [cm]
-    auto entries = std::vector<float>{{
-        250.0f,         // 0
-        1 / 0.0f,       // PI / 4
-        125.0f,         // PI / 2
-        50.0f           // 3PI / 4
-    }};
-
-    auto reading = find_min_reading(
-        angle_min, angle_step,
-        range_min, range_max,
-        entries
-    );
-    ASSERT_FLOAT_EQ(*reading.range, 5000.0);
-    ASSERT_FLOAT_EQ(*reading.angle, get_angle(angle_min, angle_step, 3));
-
-    reading = find_min_reading(
-        angle_min, angle_step,
-        100.0, range_max,
-        entries
-    );
-    ASSERT_FLOAT_EQ(*reading.range, 12500.0);
-    ASSERT_FLOAT_EQ(*reading.angle, get_angle(angle_min, angle_step, 2));
-
-    reading = find_min_reading(
-        angle_min, angle_step,
-        500.0, 500.1,
-        entries
-    );
-}
-
 TEST(TestDeflection, deflectionOutOfRange) {
     auto readings = std::vector<Reading>{{
         Reading{0.0, LIDAR_THRESHOLD + 50}
