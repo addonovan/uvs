@@ -7,6 +7,8 @@
 #include <units.hpp>
 #include <lidar.hpp>
 
+using namespace lidar;
+
 /** Compares floats for similarity out to 3 decimal places */
 #define assert_kinda_equal(a, b) \
         do { \
