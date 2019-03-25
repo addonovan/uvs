@@ -8,7 +8,7 @@
 #include <sensor_msgs/LaserScan.h>
 
 #include <units.hpp>
-#include <deflection.hpp>
+#include <lidar.hpp>
 
 //
 // Deflection Publisher
@@ -47,6 +47,8 @@ void publish_deflection(Radian deflection) {
 //
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
+    using namespace lidar;
+
     auto readings = map_readings(
         message->angle_min,
         message->angle_increment,
@@ -79,7 +81,7 @@ void on_sonar_message(const std_msgs::UInt16::ConstPtr& message) {
 }
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "lidar");
+    ros::init(argc, argv, "reactive_controls");
     ros::NodeHandle n;
 
     // set up the publisher
@@ -91,8 +93,9 @@ int main(int argc, char** argv) {
     ros::Subscriber sonar_subscriber = n.subscribe("sonar", 1, on_sonar_message);
 
     // run endlessly
-    ROS_INFO("Initialized lidar reactive control system");
+    ROS_INFO("Initialized reactive control system");
     ros::spin();
+
     return 0;
 }
 

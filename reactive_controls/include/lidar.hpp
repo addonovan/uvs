@@ -4,8 +4,11 @@
 
 #include "units.hpp"
 
-const Centimeter LIDAR_THRESHOLD = 100;
 const Centimeter SONAR_THRESHOLD = -10;
+
+namespace lidar {
+
+const Centimeter LIDAR_THRESHOLD = 100;
 
 struct Reading {
     Radian angle;
@@ -31,3 +34,4 @@ std::vector<Reading> map_readings(
 
 Radian calculate_deflection(const std::vector<Reading>& readings);
 
+}

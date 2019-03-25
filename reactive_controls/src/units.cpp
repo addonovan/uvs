@@ -42,5 +42,7 @@ Degree::as_radian() const noexcept {
 // Centimeter
 //
 
+Centimeter::Centimeter() noexcept : NumericType(0) {}
+
 Centimeter::Centimeter(int inner) noexcept : NumericType(inner) {}
 

@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include <units.hpp>
-#include <deflection.hpp>
+#include <lidar.hpp>
 
 /** Compares floats for similarity out to 3 decimal places */
 #define assert_kinda_equal(a, b) \

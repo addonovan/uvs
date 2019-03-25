@@ -40,6 +40,8 @@ struct Centimeter final : NumericType<Centimeter, int>,
 
   public:
 
+    Centimeter() noexcept;
+
     Centimeter(int inner) noexcept;
 
 };

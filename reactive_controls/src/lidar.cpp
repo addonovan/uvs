@@ -3,10 +3,12 @@
 #include <algorithm>
 
 #include <units.hpp>
-#include <deflection.hpp>
+#include <lidar.hpp>
 
 constexpr double HALF_PI = PI / 2;
 constexpr double TAU = 2 * PI;
+
+namespace lidar {
 
 double get_angle(double min, double step, int i) {
     // ported from the following matlab code:
@@ -92,3 +94,4 @@ Radian calculate_deflection(const std::vector<Reading>& readings) {
     return deflection;
 }
 
+}
