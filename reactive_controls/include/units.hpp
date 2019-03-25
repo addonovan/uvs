@@ -16,7 +16,7 @@ struct Radian final : NumericType<Radian, double>, PartialOrdering<Radian> {
 
   public:
 
-    Radian();
+    Radian() noexcept;
 
     Radian(double inner);
 
