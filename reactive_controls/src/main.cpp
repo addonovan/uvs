@@ -66,7 +66,7 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
 }
 
 void on_sonar_message(const std_msgs::UInt16::ConstPtr& message) {
-    Centimeter range = static_cast<int>(message->data / 10); // convert [mm] to [cm]
+    Centimeter range = message->data / 10; // convert [mm] to [cm]
 
     Radian deflection;
 
