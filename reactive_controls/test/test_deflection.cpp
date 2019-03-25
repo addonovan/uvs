@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <random>
+#include <chrono>
 
 #include <gtest/gtest.h>
 
@@ -78,4 +80,66 @@ TEST(TestDeflection, findsSmallestReading) {
         entries
     );
     ASSERT_TRUE(std::isinf(reading.range));
+}
+
+TEST(TestDeflection, deflectionOutOfRange) {
+    auto reading = Reading{0.0, LIDAR_THRESHOLD + 50.0};
+    ASSERT_FLOAT_EQ(calculate_deflection(reading), 0.0);
+
+    reading.range = LIDAR_THRESHOLD + 1.0;
+    ASSERT_FLOAT_EQ(calculate_deflection(reading), 0.0);
+
+    reading.range = LIDAR_THRESHOLD + 0.00001;
+    ASSERT_FLOAT_EQ(calculate_deflection(reading), 0.0);
+}
+
+TEST(TestDeflection, deflectionInRange) {
+    auto reading = Reading{PI / 4, LIDAR_THRESHOLD / 2.0};
+    ASSERT_FLOAT_EQ(calculate_deflection(reading), -1.1781);
+
+    // the opposite angle should give the opposite value
+    reading.angle *= -1;
+    ASSERT_FLOAT_EQ(calculate_deflection(reading),  1.1781);
+
+    // angles closer to zero should have higher deflection magnitudes
+    reading.range = 0;
+    ASSERT_FLOAT_EQ(calculate_deflection(reading),  2.3562);
+
+    reading.angle *= -1;
+    ASSERT_FLOAT_EQ(calculate_deflection(reading), -2.3562);
+}
+
+TEST(TestDeflection, deflectionProperties) {
+    auto reading = Reading{0, 0};
+
+    // as the angle increases, the value should always become more negative
+    double previous_deflection = 1.0 / 0.0;
+    while (reading.angle < PI / 2) {
+        double deflection = calculate_deflection(reading);
+
+        if (std::isfinite(previous_deflection)) {
+            ASSERT_GE(previous_deflection, deflection);
+        }
+
+        previous_deflection = deflection;
+        reading.angle += PI / 16.0;
+    }
+
+    // this is peek STL right here...
+    using std::chrono::system_clock;
+    std::default_random_engine generator;
+    generator.seed(static_cast<unsigned long>(system_clock::now().time_since_epoch().count()));
+    std::uniform_real_distribution<double> distribution{0.0, PI / 2};
+
+    // f(theta) = x => f(-theta) = -x
+    for (int i = 0; i < 100; i++) {
+        double angle = distribution(generator);
+
+        reading.angle = angle;
+        double a = calculate_deflection(reading);
+
+        reading.angle = -angle;
+        double b = calculate_deflection(reading);
+        ASSERT_FLOAT_EQ(a, -b);
+    }
 }
