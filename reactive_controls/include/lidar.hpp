@@ -4,8 +4,6 @@
 
 #include "units.hpp"
 
-const Centimeter SONAR_THRESHOLD = -10;
-
 namespace lidar {
 
 const Centimeter LIDAR_THRESHOLD = 100;

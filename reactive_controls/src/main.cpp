@@ -9,6 +9,7 @@
 
 #include <units.hpp>
 #include <lidar.hpp>
+#include <sonar.hpp>
 
 //
 // Deflection Publisher
@@ -31,6 +32,7 @@ void publish_deflection(Radian deflection) {
         lidar_deflection = deflection;
     }
 
+    // prefer to deflect by sonar rather than lidar
     if (sonar_deflection > 0.0) {
         message.data = *sonar_deflection;
     } else if (lidar_deflection > 0.0) {
@@ -38,13 +40,19 @@ void publish_deflection(Radian deflection) {
     } else {
         message.data = 0.0;
     }
-    
+
+#define FORMAT " deflection by %+1.3lf rad"
+    if (abs(message.data) > 0.0009) {
+        if (IsSonar) {
+            ROS_INFO("SONAR" FORMAT, message.data);
+        } else {
+            ROS_INFO("LIDAR" FORMAT, message.data);
+        }
+    }
+#undef FORMAT
+
     publisher->publish(message);
 }
-
-//
-// ROS Stuff
-//
 
 void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
     using namespace lidar;
@@ -57,27 +65,17 @@ void on_lidar_message(const sensor_msgs::LaserScan::ConstPtr& message) {
         message->ranges
     );
 
-    // publish no deflection, unless we actually find a valid reading and
-    // then we'll publish that deflection
     Radian deflection = calculate_deflection(readings);
-    if (abs(*deflection) > 0.0009) {
-        ROS_INFO("LIDAR Deflection: %+1.3lf [rad]", *deflection);
-    }
-
     publish_deflection<false>(deflection);
 }
 
 void on_sonar_message(const std_msgs::UInt16::ConstPtr& message) {
+    using namespace sonar;
+
     Centimeter range = message->data / 10; // convert [mm] to [cm]
 
-    Radian deflection;
-
-    if (range < SONAR_THRESHOLD) {
-        deflection = *(SONAR_THRESHOLD - range) * (3 * PI / 4) / *SONAR_THRESHOLD;
-        ROS_INFO("SONAR Deflection: %+1.3lf [rad]", *deflection);
-    }
-    
-    publish_deflection<true>(deflection);    
+    Radian deflection = calculate_deflection(range);
+    publish_deflection<true>(deflection);
 }
 
 int main(int argc, char** argv) {
