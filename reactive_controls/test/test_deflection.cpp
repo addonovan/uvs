@@ -103,19 +103,21 @@ TEST(TestDeflection, deflectionOutOfRange) {
 }
 
 TEST(TestDeflection, deflectionInRange) {
-    auto reading = Reading{PI / 4, LIDAR_THRESHOLD / 2};
-    assert_kinda_equal(calculate_deflection(reading), -1.1781);
+    auto readings = std::vector<Reading>{{
+        Reading{PI / 4, LIDAR_THRESHOLD / 2}
+    }};
+    assert_kinda_equal(*calculate_deflection(readings), -1.1781);
 
     // the opposite angle should give the opposite value
-    reading.angle *= -1;
-    assert_kinda_equal(calculate_deflection(reading),  1.1781);
+    readings[0].angle *= -1;
+    assert_kinda_equal(*calculate_deflection(readings),  1.1781);
 
     // angles closer to zero should have higher deflection magnitudes
-    reading.range = 0;
-    assert_kinda_equal(calculate_deflection(reading),  2.3562);
+    readings[0].range = 0;
+    assert_kinda_equal(*calculate_deflection(readings),  2.3562);
 
-    reading.angle *= -1;
-    assert_kinda_equal(calculate_deflection(reading), -2.3562);
+    readings[0].angle *= -1;
+    assert_kinda_equal(*calculate_deflection(readings), -2.3562);
 }
 
 TEST(TestDeflection, deflectionProperties) {

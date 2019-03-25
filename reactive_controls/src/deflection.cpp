@@ -147,7 +147,7 @@ Radian calculate_deflection(const std::vector<Reading>& readings) {
     double deflection = 0.0;
     if (min.range < LIDAR_THRESHOLD) {
         deflection = *(LIDAR_THRESHOLD - min.range) * (3 * PI / 4) / *LIDAR_THRESHOLD;
-        if (min.angle < 0) {
+        if (min.angle > 0) {
             deflection *= -1;
         }
     }
