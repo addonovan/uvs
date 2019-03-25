@@ -6,7 +6,7 @@
 
 namespace lidar {
 
-const Centimeter LIDAR_THRESHOLD = 100;
+const Centimeter THRESHOLD = 100;
 
 struct Reading {
     Radian angle;

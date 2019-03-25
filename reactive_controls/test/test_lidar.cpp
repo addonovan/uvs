@@ -61,17 +61,17 @@ TEST(TestDeflection, readingsWithinAngleRange) {
 
 TEST(TestDeflection, deflectionOutOfRange) {
     auto readings = std::vector<Reading>{{
-        Reading{0.0, LIDAR_THRESHOLD + 50}
+        Reading{0.0, THRESHOLD + 50}
     }};
     assert_kinda_equal(*calculate_deflection(readings), 0.0);
 
-    readings[0].range = LIDAR_THRESHOLD + 1;
+    readings[0].range = THRESHOLD + 1;
     assert_kinda_equal(*calculate_deflection(readings), 0.0);
 }
 
 TEST(TestDeflection, deflectionInRange) {
     auto readings = std::vector<Reading>{{
-        Reading{PI / 4, LIDAR_THRESHOLD / 2}
+        Reading{PI / 4, THRESHOLD / 2}
     }};
     assert_kinda_equal(*calculate_deflection(readings), -1.1781);
 

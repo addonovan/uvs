@@ -4,7 +4,7 @@
 
 namespace sonar {
 
-const Centimeter SONAR_THRESHOLD = -10;
+const Centimeter THRESHOLD = 100;
 
 Radian calculate_deflection(Centimeter range);
 
