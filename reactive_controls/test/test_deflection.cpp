@@ -89,18 +89,15 @@ TEST(TestDeflection, findsSmallestReading) {
 }
 
 TEST(TestDeflection, deflectionOutOfRange) {
-    auto reading = Reading{0.0, LIDAR_THRESHOLD + 50.0};
+    auto reading = Reading{0.0, LIDAR_THRESHOLD + 50};
     assert_kinda_equal(calculate_deflection(reading), 0.0);
 
-    reading.range = LIDAR_THRESHOLD + 1.0;
-    assert_kinda_equal(calculate_deflection(reading), 0.0);
-
-    reading.range = LIDAR_THRESHOLD + 0.00001;
+    reading.range = LIDAR_THRESHOLD + 1;
     assert_kinda_equal(calculate_deflection(reading), 0.0);
 }
 
 TEST(TestDeflection, deflectionInRange) {
-    auto reading = Reading{PI / 4, LIDAR_THRESHOLD / 2.0};
+    auto reading = Reading{PI / 4, LIDAR_THRESHOLD / 2};
     assert_kinda_equal(calculate_deflection(reading), -1.1781);
 
     // the opposite angle should give the opposite value
