@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <algorithm>
 
 #include <units.hpp>
 #include <deflection.hpp>
@@ -41,6 +42,33 @@ bool is_valid_reading(
     return angle >= -HALF_PI && angle <= HALF_PI;
 }
 
+double calculate_deflection(const Reading& reading) {
+    // converted from following matlab code:
+    // if (~isempty(lidar_range) && lidar_range <= lidar_threshold)
+    //      if lidar_angle >= 0
+    //          theta_change = -(lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
+    //      elseif lidar_angle<0
+    //          theta_change = (lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
+    //      end
+    //      ...
+    // end
+    //
+    // - abs(theta_change) is the same on both branches
+    // - isempty(lidar_range) is for when there're no readings, but that's
+    //   handled by the calling function (guaranteed by our assertions)
+
+    // ignore values over the threshold
+    if (reading.range > LIDAR_THRESHOLD) {
+        return 0.0;
+    }
+
+    // calculate the magnitude of the angle
+    double mag = *(LIDAR_THRESHOLD - reading.range) * (3 * PI / 4) / *LIDAR_THRESHOLD;
+
+    // multiply by the direction of the angle
+    return mag * (reading.angle > 0 ? -1 : 1);
+}
+
 Reading find_min_reading(
     double angle_min,
     double angle_step,
@@ -76,29 +104,53 @@ Reading find_min_reading(
     return reading;
 }
 
-double calculate_deflection(const Reading& reading) {
-    // converted from following matlab code:
-    // if (~isempty(lidar_range) && lidar_range <= lidar_threshold)
-    //      if lidar_angle >= 0
-    //          theta_change = -(lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
-    //      elseif lidar_angle<0
-    //          theta_change = (lidar_threshold-lidar_range)^2*3*pi/4/lidar_threshold^2;
-    //      end
-    //      ...
-    // end
-    //
-    // - abs(theta_change) is the same on both branches
-    // - isempty(lidar_range) is for when there're no readings, but that's
-    //   handled by the calling function (guaranteed by our assertions)
+std::vector<Reading> map_readings(
+    double angle_min,
+    double angle_step,
+    double range_min,
+    double range_max,
+    const std::vector<float>& ranges
+) {
+    std::vector<Reading> output;
+    output.reserve(ranges.size());
 
-    // ignore values over the threshold
-    if (reading.range > LIDAR_THRESHOLD) {
+    int i = 0;
+    for (double range: ranges) {
+        Radian angle = get_angle(angle_min, angle_step, i++);
+
+        if (!is_valid_reading(range_min, range_max, range, *angle)) {
+            continue;
+        }
+
+        Centimeter range_cm = static_cast<int>(range * 100); // convert [m] to [cm]
+
+        output.push_back(Reading{angle, range_cm});
+    }
+
+    return output;
+}
+
+Radian calculate_deflection(const std::vector<Reading>& readings) {
+    if (readings.empty()) {
         return 0.0;
     }
 
-    // calculate the magnitude of the angle
-    double mag = *(LIDAR_THRESHOLD - reading.range) * (3 * PI / 4) / *LIDAR_THRESHOLD;
+    // find the minimum element
+    const auto& min = *std::min_element(
+        readings.begin(), readings.end(),
+        [](const Reading& a, const Reading& b) {
+            return a.range < b.range;
+        }
+    );
 
-    // multiply by the direction of the angle
-    return mag * (reading.angle > 0 ? -1 : 1);
+    // calculate deflection based off of that
+    double deflection = 0.0;
+    if (min.range < LIDAR_THRESHOLD) {
+        deflection = *(LIDAR_THRESHOLD - min.range) * (3 * PI / 4) / *LIDAR_THRESHOLD;
+        if (min.angle < 0) {
+            deflection *= -1;
+        }
+    }
+    return deflection;
 }
+

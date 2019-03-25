@@ -30,3 +30,14 @@ Reading find_min_reading(
 );
 
 double calculate_deflection(const Reading& reading);
+
+std::vector<Reading> map_readings(
+    double angle_min,
+    double angle_step,
+    double range_min,
+    double range_max,
+    const std::vector<float>& ranges
+);
+
+Radian calculate_deflection(const std::vector<Reading>& readings);
+
