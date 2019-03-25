@@ -5,8 +5,8 @@
 #include <units.hpp>
 #include <deflection.hpp>
 
-const double HALF_PI = PI / 2;
-const double TAU = 2 * PI;
+constexpr double HALF_PI = PI / 2;
+constexpr double TAU = 2 * PI;
 
 double get_angle(double min, double step, int i) {
     // ported from the following matlab code:
