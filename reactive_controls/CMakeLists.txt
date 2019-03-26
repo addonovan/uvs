@@ -21,5 +21,5 @@ list(REMOVE_ITEM sources ${main_file})
 add_executable(reactive_controls ${include} ${sources} ${main_file})
 target_link_libraries(reactive_controls ${catkin_LIBRARIES})
 
-catkin_add_gtest(unit_tests ${tests} ${sources})
-target_link_libraries(unit_tests ${catkin_LIBRARIES})
+catkin_add_gtest(test_reactive_controls ${tests} ${sources})
+target_link_libraries(test_reactive_controls ${catkin_LIBRARIES})
