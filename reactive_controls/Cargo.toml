@@ -5,3 +5,4 @@ authors = ["addonovan <austin@addonovan.com>"]
 edition = "2018"
 
 [dependencies]
+rosrust = "0.7.1"
