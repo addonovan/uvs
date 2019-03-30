@@ -45,6 +45,6 @@ impl Environment {
     }
 
     pub fn deflection(&self) -> Radian {
-        Radian::from(0.)
+        Radian::new(0.)
     }
 }
