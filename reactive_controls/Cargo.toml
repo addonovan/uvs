@@ -1,0 +1,7 @@
+[package]
+name = "uvs"
+version = "0.1.0"
+authors = ["addonovan <austin@addonovan.com>"]
+edition = "2018"
+
+[dependencies]
