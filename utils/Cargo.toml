@@ -1,9 +1,8 @@
 [package]
-name = "uvs"
+name = "utils"
 version = "0.1.0"
 authors = ["addonovan <austin@addonovan.com>"]
 edition = "2018"
 
 [dependencies]
-utils = { path = "../utils" }
-rosrust = "0.7.1"
+nalgebra = "0.17.3"
