@@ -46,7 +46,17 @@ impl Environment {
     }
 
     pub fn deflection(&self) -> Radian {
-        Radian::new(0.)
+        let sonar_deflection = self.sonar_deflection();
+        if sonar_deflection.abs() > 0.01 {
+            return Radian::new(sonar_deflection);
+        }
+
+        let lidar_deflection = self.lidar_deflection();
+        if lidar_deflection.abs() > 0.01 {
+            return Radian::new(lidar_deflection);
+        }
+
+        return Radian::new(0.0);
     }
 
     fn lidar_deflection(&self) -> f64 {
