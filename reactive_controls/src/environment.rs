@@ -2,6 +2,7 @@ use utils::unit::Radian;
 
 use crate::std_msgs::UInt16;
 use crate::sensor_msgs::LaserScan;
+use std::cmp::Ordering;
 
 const SONAR_THRESHOLD: i32 = 200; // [cm]
 const LIDAR_THRESHOLD: i32 = 200; // [cm]
@@ -46,5 +47,44 @@ impl Environment {
 
     pub fn deflection(&self) -> Radian {
         Radian::new(0.)
+    }
+
+    fn lidar_deflection(&self) -> f64 {
+        use std::f64::consts::PI;
+
+        self.lidar.iter()
+            .min_by(|(_, a), (_, b)| {
+                // let's face it, floats'll never really be equal
+                if a < b {
+                    Ordering::Less
+                } else {
+                    Ordering::Greater
+                }
+            })
+            .map(|(angle, reading)| {
+                let thresh = LIDAR_THRESHOLD as f64;
+                let scale = (thresh - reading) / thresh;
+                let angle = if angle.inner() > 0.0 {
+                    -3.0 * PI / 4.0
+                } else {
+                    3.0 * PI / 4.0
+                };
+
+                scale * angle
+            })
+            .unwrap_or(0.0)
+    }
+
+    fn sonar_deflection(&self) -> f64 {
+        use std::f64::consts::PI;
+
+        if self.sonar >= SONAR_THRESHOLD {
+            0.0
+        } else {
+            let scale = (SONAR_THRESHOLD - self.sonar) as f64 / (SONAR_THRESHOLD as f64);
+            let angle = 3.0 * PI / 4.0;
+
+            scale * angle
+        }
     }
 }
