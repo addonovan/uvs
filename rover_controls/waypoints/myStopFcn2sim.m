@@ -1,10 +1,19 @@
-function [] = myStopFcn2sim(xActEst,yActEst,X_array,Y_array,rp1,rp2)
+function [] = myStopFcn2sim(xEst,yEst,X_array,Y_array,rp1,rp2)
+mot_r = rospublisher('/pwm_cmd_r','std_msgs/Int16');
+msg_r = rosmessage(mot_r);
+msg_r.Data = 0;
+mot_l = rospublisher('/pwm_cmd_l','std_msgs/Int16');
+msg_l = rosmessage(mot_l);
+msg_l.Data = 0;
+pause(3);
+send(mot_r,msg_r);
+send(mot_l,msg_l);
 
 figure('units','normalized','position',[.1 .1 .75 .75])
-plot(yActEst.signals.values(:,1),xActEst.signals.values(:,1),'b-')
+plot(yEst.signals.values(:,1),xEst.signals.values(:,1),'b-')
 hold on
-plot(yActEst.signals.values(:,2),xActEst.signals.values(:,2),'b--')
-legend('Actual Path','Estimated Path')
+% plot(yEst.signals.values(:,2),xEst.signals.values(:,2),'b--')
+legend('Actual Path');%,'Estimated Path')
 plot(Y_array,X_array,'*r')
 grid
 vAxis = axis;
